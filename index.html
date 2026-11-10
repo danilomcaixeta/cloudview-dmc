@@ -76,8 +76,8 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 .pinoWrap{position:relative;width:120px;height:92px;pointer-events:auto;cursor:pointer}
 .pinoSombra{position:absolute;left:50%;top:50px;width:30px;height:11px;margin-left:-6px;border-radius:50%;background:rgba(0,0,0,.38);filter:blur(1.5px)}
 .pinoGota{position:absolute;left:50%;top:0;width:44px;height:58px;margin-left:-22px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
-.pinoGota svg{position:absolute;left:0;top:0;width:44px;height:58px}
-.pinoGota img{position:absolute;left:6px;top:6px;width:32px;height:32px;border-radius:50%;object-fit:cover;background:#fff}
+.pinoGota svg{position:absolute;left:0;top:0;width:44px;height:58px;z-index:1}
+.pinoGota img{position:absolute!important;left:6px;top:6px;width:32px!important;height:32px!important;max-width:none!important;border-radius:50%;object-fit:cover;background:#fff;z-index:2;display:block}
 .pinoEtiq{position:absolute;left:50%;top:60px;transform:translateX(-50%);white-space:nowrap;background:linear-gradient(#f4f4f4,#dcdcdc);border:1px solid #cfcfcf;border-radius:9px;padding:3px 10px;font:600 12.5px/1.25 Inter,system-ui,sans-serif;color:#444;box-shadow:0 1px 3px rgba(0,0,0,.35)}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
