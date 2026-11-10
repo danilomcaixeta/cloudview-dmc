@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DMC · Visualizador de Varreduras</title>
+<style>
+:root{--azul:#1a85c8;--barra:#101418;--painel:#f2f3f4;--txt:#1b1f23;--sel:#5bb7e6}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-serif;color:#fff;overflow:hidden}
+#topo{position:absolute;left:0;right:0;top:0;height:32px;background:#000;display:flex;align-items:center;padding:0 14px;font-weight:600;z-index:20}
+#topo span{opacity:.75;font-weight:400;margin-left:10px}
+#cv{position:absolute;left:0;top:32px;right:260px;bottom:28px;width:calc(100% - 260px);height:calc(100% - 60px);cursor:crosshair;touch-action:none}
+#lat{position:absolute;right:0;top:32px;bottom:0;width:260px;background:var(--painel);color:var(--txt);z-index:15;overflow:auto}
+#lat h3{padding:12px 16px;font-size:13px;border-bottom:1px solid #d6d9dc}
+.item{display:flex;gap:12px;align-items:center;padding:12px 16px;cursor:pointer;border-bottom:1px solid #e3e5e7}
+.item:hover{background:#e9ecef}.item.ativo{background:#fff;border-left:3px solid var(--azul);padding-left:13px}
+.item svg{width:22px;height:22px;flex:none}
+#bar{position:absolute;left:0;right:260px;bottom:0;height:28px;background:#f3f4f5;color:#222;display:flex;gap:18px;align-items:center;padding:0 12px;font-size:12px;z-index:12;white-space:nowrap;overflow:hidden}
+#bar b{font-weight:600}
+#tools{position:absolute;left:0;top:32px;bottom:28px;width:58px;display:flex;flex-direction:column;gap:6px;padding:10px 6px;z-index:12}
+.bt{width:46px;height:46px;border-radius:4px;background:rgba(246,247,248,.95);border:0;color:#222;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.bt.on{background:var(--sel);color:#fff}.bt svg{width:24px;height:24px}
+#cfg{position:absolute;left:0;bottom:28px;width:44px;height:44px;border-radius:0 22px 0 0;background:rgba(40,46,52,.85);border:0;color:#fff;z-index:30;cursor:pointer}
+#painelCfg{position:absolute;left:0;bottom:72px;width:300px;background:rgba(246,247,248,.97);color:#222;border-radius:0 8px 8px 0;padding:14px 16px;z-index:30;display:none;box-shadow:0 4px 18px #0007}
+#painelCfg.aberto{display:block}
+#painelCfg h4{font-size:13px;margin-bottom:10px}
+.lin{margin:10px 0}.lin label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.lin input[type=range]{width:100%}
+.chk{display:flex;gap:8px;align-items:center;margin:12px 0;font-size:12.5px}
+.row{display:flex;gap:8px;margin-top:10px}
+.row button{flex:1;padding:8px;border:1px solid #b9bec3;border-radius:4px;background:#fff;cursor:pointer;font-size:12px}
+.row button.p{background:var(--azul);color:#fff;border-color:var(--azul)}
+.rot{position:absolute;pointer-events:none;background:rgba(246,247,248,.96);color:#222;padding:3px 7px;border-radius:4px;font-size:12px;z-index:9;box-shadow:0 1px 4px #0006;line-height:1.35}
+.rot.det{pointer-events:auto;max-width:230px}
+#bussola{position:absolute;left:calc((100% - 260px)/2 - 120px);bottom:28px;width:240px;height:48px;z-index:11;pointer-events:none}
+#dica{position:absolute;left:70px;top:44px;background:#0009;padding:6px 10px;border-radius:4px;font-size:12px;z-index:10;max-width:420px}
+#toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:#1b1f23;padding:8px 14px;border-radius:6px;z-index:40;display:none}
+
+@media (max-width:760px){
+  #lat{width:150px}
+  #cv{right:150px;width:calc(100% - 150px)}
+  #bar{right:150px;font-size:10.5px;gap:10px;padding:0 8px}
+  .item{padding:10px 10px;font-size:11.5px;gap:8px}
+  .item.ativo{padding-left:7px}
+  .item svg{width:16px;height:16px}
+  #lat h3{font-size:11px;padding:10px}
+  #tools{width:48px}.bt{width:38px;height:38px}.bt svg{width:20px;height:20px}
+  #painelCfg{width:calc(100vw - 24px);left:12px;border-radius:8px}
+  #dica{display:none}
+  #bussola{left:calc((100% - 150px)/2 - 90px);width:180px}
+}
+
+#lat.oculto{display:none}
+#cv.cheio{right:0!important;width:100%!important}
+#bar.cheio{right:0!important}
+#abrirLat{position:absolute;right:12px;top:42px;z-index:22;display:none;width:40px;height:40px;border:0;border-radius:8px;background:rgba(246,247,248,.95);color:#222;font-size:18px;cursor:pointer;box-shadow:0 2px 8px #0005}
+#abrirLat.mostra{display:block}
+#fecharLat{width:30px;height:30px;border:0;background:transparent;font-size:18px;cursor:pointer;color:#555}
+#zoomBox{position:absolute;right:16px;bottom:96px;z-index:14;display:flex;flex-direction:column;gap:6px}
+#zoomBox button{width:38px;height:38px;border:0;border-radius:8px;background:rgba(246,247,248,.95);color:#222;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 2px 8px #0005}
+</style>
+</head>
+<body>
+<div id="topo">Projeto: DMC-PARKCENTER <span id="nomeScan">carregando…</span></div>
+<canvas id="cv"></canvas>
+<div id="tools">
+  <button class="bt" id="bOlho" title="Mostrar / ocultar objetos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  <button class="bt on" id="bBussola" title="Bússola"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8l-2 6-6 2 2-6z"/></svg></button>
+  <button class="bt" id="bMapa" title="Mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg></button>
+  <button class="bt" id="bNota" title="Anotações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M7 21h10"/></svg></button>
+  <button class="bt" id="bCor" title="Modo de cor"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="6" fill="#e5484d" opacity=".8"/><circle cx="15" cy="9" r="6" fill="#3b82f6" opacity=".8"/><circle cx="12" cy="15" r="6" fill="#22c55e" opacity=".8"/></svg></button>
+</div>
+<button id="cfg" title="Configurações de visualização">⚙</button>
+<div id="painelCfg">
+  <h4>Visualização da panorâmica</h4>
+  <div class="lin"><label>Brilho <b id="vBr">0</b></label><input type="range" id="rBr" min="-100" max="100" value="0"></div>
+  <div class="lin"><label>Contraste <b id="vCt">0</b></label><input type="range" id="rCt" min="-100" max="100" value="0"></div>
+  <div class="lin"><label>Gama <b id="vGm">1,00</b></label><input type="range" id="rGm" min="30" max="250" value="100"></div>
+  <label class="chk"><input type="checkbox" id="cTodas"> Aplicar a todas as panorâmicas do projeto</label>
+  <div class="row"><button id="bAplicar" class="p">Aplicar e fechar</button><button id="bReset">Restaurar original</button></div>
+  <div class="row"><button id="bAuto">Clarear automático</button></div>
+  <div id="estado" style="font-size:11px;opacity:.7;margin-top:8px"></div>
+</div>
+<div id="dica">Arraste para girar · roda para zoom · use <b>Medir a distância</b> e clique em dois pontos</div>
+<canvas id="bussola" width="240" height="48"></canvas>
+<div id="lat">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 10px 10px 16px;border-bottom:1px solid #d6d9dc"><h3 style="padding:0;border:0;font-size:13px">Cloud View DMC</h3><button id="fecharLat" title="Recolher painel">&raquo;</button></div>
+  <div class="item" id="mProjetos"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="8" height="16"/><path d="M14 6h7M14 12h7M14 18h7"/></svg>Projetos</div>
+  <div class="item" id="mMapa"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg>Mapa de visão geral</div>
+  <div class="item ativo" id="mVarr"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>Visualização de Varreduras</div>
+  <div class="item" id="mMedir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17l10-10"/></svg>Medir a distância</div>
+  <div class="item" id="mExcluir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Excluir</div>
+  <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Conteúdo do projeto</div>
+</div>
+<button id="abrirLat" title="Mostrar painel">&laquo;</button>
+<div id="zoomBox"><button id="zIn" title="Aproximar">+</button><button id="zOut" title="Afastar">&minus;</button></div>
+<div id="bar"><span id="bNome">—</span><span id="bXYZ">XYZ: —</span><span id="bData">—</span><span id="bQual">Qualidade: Alta</span><span id="bPin">Alfinete: —</span><span id="bD">d: —</span></div>
+<div id="toast"></div>
+<script>
+window.addEventListener('error',e=>{const d=document.getElementById('dica');if(d)d.textContent='ERRO: '+e.message+' @'+(e.lineno||'')});
+window.addEventListener('unhandledrejection',e=>{const d=document.getElementById('dica');if(d)d.textContent='ERRO: '+(e.reason&&e.reason.message||e.reason)});
+(async()=>{
+const meta=await (await fetch('scan.json')).json();
+const W=meta.w,H=meta.h,N=W*H,ESC=meta.escala;
+const full=await (await fetch('xyz.bin')).arrayBuffer();
+const gx=new Int16Array(full,0,N),gy=new Int16Array(full,N*2,N),gz=new Int16Array(full,N*4,N),gv=new Uint8Array(full,N*6,N);
+const img=new Image();img.src='pano_web_cru.jpg';await img.decode();
+document.getElementById('nomeScan').textContent='· '+meta.nome;
+document.getElementById('bNome').textContent=meta.nome;
+document.getElementById('bData').textContent='Gravação: 2026-11-06';
+
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let cw,ch;
+function ajusta(){const r=cv.getBoundingClientRect();cw=cv.width=r.width;ch=cv.height=r.height;desenha()}
+// imagem processada (brilho/contraste/gama) em canvas auxiliar
+const aux=document.createElement('canvas');aux.width=W;aux.height=H;const ax=aux.getContext('2d',{willReadFrequently:true});
+ax.drawImage(img,0,0,W,H);
+const orig=ax.getImageData(0,0,W,H);
+const out=ax.createImageData(W,H);
+let br=0,ct=0,gm=1.0;
+function percentis(){
+  const h=new Uint32Array(256);let n=0;
+  for(let i=0;i<N;i++){if(gv[i]){h[orig.data[i*4]]++;n++}}
+  let a=0,lo=0,hi=255;for(let k=0;k<256;k++){a+=h[k];if(a>=n*.01){lo=k;break}}
+  a=0;for(let k=0;k<256;k++){a+=h[k];if(a>=n*.995){hi=k;break}}
+  return [lo,hi];
+}
+function aplica(){
+  const f=(259*(ct+255))/(255*(259-ct));
+  const lut=new Uint8ClampedArray(256);
+  for(let k=0;k<256;k++){
+    let v=k/255; v=Math.pow(v,1/gm)*255; v=f*(v-128)+128+br*2.55; lut[k]=v;
+  }
+  const d=orig.data,o=out.data;
+  for(let i=0;i<N;i++){const v=lut[d[i*4]];o[i*4]=o[i*4+1]=o[i*4+2]=v;o[i*4+3]=255}
+  ax.putImageData(out,0,0);desenha();
+}
+// câmera
+let yaw=0,pitch=0,fov=75*Math.PI/180;
+const FOVMIN=8*Math.PI/180,FOVMAX=110*Math.PI/180;
+// direção do pixel (i,j) -> vetor unitário no sistema do scanner via XYZ real
+// usamos grade equiretangular de visualização: coluna = azimute, linha = elevação
+function pixDir(u,v){ // u in [0,1), v in [0,1]
+  const az=(u-0.5)*2*Math.PI, el=(0.5-v)*Math.PI;
+  return [Math.cos(el)*Math.sin(az),Math.sin(el),Math.cos(el)*Math.cos(az)];
+}
+function desenha(){
+  if(!cw)return;
+  const id=ctx.createImageData(cw,ch),px=id.data;
+  const tf=Math.tan(fov/2),asp=cw/ch;
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const sd=out.data.length?out.data:orig.data;
+  for(let y=0;y<ch;y++){
+    const ny=(1-2*(y+.5)/ch)*tf;
+    for(let x=0;x<cw;x++){
+      const nx=(2*(x+.5)/cw-1)*tf*asp;
+      let dx=nx,dy=ny,dz=1;
+      // pitch
+      let y1=dy*cp-dz*sp,z1=dy*sp+dz*cp;
+      // yaw
+      let x2=dx*cy+z1*sy,z2=-dx*sy+z1*cy;
+      const az=Math.atan2(x2,z2),el=Math.atan2(y1,Math.hypot(x2,z2));
+      let u=az/(2*Math.PI)+0.5,v=0.5-el/Math.PI;
+      const ix=Math.min(W-1,Math.max(0,(u*W)|0)),iy=Math.min(H-1,Math.max(0,(v*H)|0));
+      const s=(iy*W+ix)*4,p=(y*cw+x)*4;
+      px[p]=sd[s];px[p+1]=sd[s+1];px[p+2]=sd[s+2];px[p+3]=255;
+    }
+  }
+  ctx.putImageData(id,0,0);
+  desenhaNadir();desenhaMedicoes();desenhaBussola();
+}
+// celula (i,j) da panoramica -> tela, na MESMA convencao usada no desenho
+function telaDeCelula(i,j){
+  const az=(j/W-0.5)*2*Math.PI, el=(0.5-i/H)*Math.PI, ce=Math.cos(el);
+  return projDir(Math.sin(az)*ce, Math.sin(el), Math.cos(az)*ce);
+}
+// ponto 3D -> tela
+function projeta(p){
+  const [X,Y,Z]=p; const r=Math.hypot(X,Y,Z)||1;
+  // eixos do scanner: usar o próprio mapa XYZ, direção = normalizado
+  const dx=X/r,dy=Z/r,dz=Y/r; // x leste, z altura -> tela y
+  return projDir(dx,dy,dz);
+}
+function projDir(dx,dy,dz){
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  let x1=dx*cy-dz*sy,z1=dx*sy+dz*cy;
+  let y2=dy*cp+z1*sp,z2=-dy*sp+z1*cp;
+  if(z2<=0.01)return null;
+  const tf=Math.tan(fov/2),asp=cw/ch;
+  return [ (x1/z2/(tf*asp)+1)/2*cw, (1-y2/z2/tf)/2*ch ];
+}
+// pixel da tela -> índice na grade (u,v) -> XYZ real
+function telaParaGrade(x,y){
+  const tf=Math.tan(fov/2),asp=cw/ch;
+  const nx=(2*x/cw-1)*tf*asp,ny=(1-2*y/ch)*tf;
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  let y1=ny*cp-sp,z1=ny*sp+cp;
+  let x2=nx*cy+z1*sy,z2=-nx*sy+z1*cy;
+  const az=Math.atan2(x2,z2),el=Math.atan2(y1,Math.hypot(x2,z2));
+  const u=az/(2*Math.PI)+0.5,v=0.5-el/Math.PI;
+  return [Math.min(W-1,Math.max(0,(u*W)|0)),Math.min(H-1,Math.max(0,(v*H)|0))];
+}
+function ponto3D(x,y){
+  const [i,j]=telaParaGrade(x,y);
+  // procura vizinho válido num raio pequeno
+  for(let r=0;r<=6;r++){
+    for(let dj=-r;dj<=r;dj++)for(let di=-r;di<=r;di++){
+      const a=Math.min(W-1,Math.max(0,i+di)),b=Math.min(H-1,Math.max(0,j+dj)),k=b*W+a;
+      if(gv[k])return {p:[gx[k]/ESC,gy[k]/ESC,gz[k]/ESC],k,i:b,j:a};
+    }
+  }
+  return null;
+}
+const pose=meta.pose;
+function absoluto(p){const R=pose.R,t=pose.t;return [R[0][0]*p[0]+R[0][1]*p[1]+R[0][2]*p[2]+t[0],R[1][0]*p[0]+R[1][1]*p[1]+R[1][2]*p[2]+t[1],R[2][0]*p[0]+R[2][1]*p[1]+R[2][2]*p[2]+t[2]]}
+const f3=n=>n.toFixed(3).replace('.',','),f2=n=>n.toFixed(3).replace('.',',');
+// medições
+let medir=false,pts=[],meds=[],labels=[],alfinete=null;
+
+function desenhaNadir(){
+  // polo inferior no referencial do scanner: Z para baixo
+  const c=projDir(0,-1,0); if(!c)return;
+  const th=13*Math.PI/180;
+  const e=projDir(Math.sin(th),-Math.cos(th),0); if(!e)return;
+  const r=Math.hypot(e[0]-c[0],e[1]-c[1])||40;
+  const g=ctx.createRadialGradient(c[0],c[1],r*0.5,c[0],c[1],r);
+  g.addColorStop(0,'rgba(22,23,26,1)');
+  g.addColorStop(0.78,'rgba(22,23,26,0.96)');
+  g.addColorStop(1,'rgba(22,23,26,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(c[0],c[1],r,0,7);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(c[0],c[1],r*0.80,0,7);ctx.stroke();
+}
+function desenhaMedicoes(){
+  document.querySelectorAll('.rot.med').forEach(e=>e.remove());
+  if(!document.getElementById('bOlho').classList.contains('on')&&false)return;
+  ctx.lineWidth=2;
+  for(const m of meds){
+    const A=m.a,B=m.b; const pa=(m.ca&&telaDeCelula(m.ca[0],m.ca[1]))||projeta(A),pb=(m.cb&&telaDeCelula(m.cb[0],m.cb[1]))||projeta(B); if(!pa||!pb)continue;
+    // catetos: horizontal e vertical
+    const pc=[pb[0],pa[1]];
+    ctx.strokeStyle='#26a0e0';ctx.beginPath();ctx.moveTo(...pa);if(pc)ctx.lineTo(...pc);ctx.lineTo(...pb);ctx.stroke();
+    ctx.strokeStyle='#000';ctx.beginPath();ctx.moveTo(...pa);ctx.lineTo(...pb);ctx.stroke();
+    ctx.fillStyle='#f5a623';for(const q of [pa,pb]){ctx.beginPath();ctx.arc(q[0],q[1],4,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.lineWidth=2}
+    const dx=B[0]-A[0],dy=B[1]-A[1],dz=B[2]-A[2];
+    const hor=Math.hypot(dx,dy),ver=Math.abs(dz),tot=Math.hypot(dx,dy,dz);
+    const mx=(pa[0]+pb[0])/2,my=(pa[1]+pb[1])/2;
+    nota(mx,my-34,m.aberto?`<b>Horizontal</b> = ${f3(hor)} m<br>Ao longo do eixo x = ${f3(Math.abs(dx))} m<br>Ao longo do eixo y = ${f3(Math.abs(dy))} m<br><b>Vertical</b> = ${f3(ver)} m<br><b>Início ao Fim</b> = ${f3(tot)} m<br><br><b>Coordenadas UTM 22S</b><br>Início: ${f2(absoluto(A)[0])}, ${f2(absoluto(A)[1])}, ${f2(absoluto(A)[2])}<br>Fim: ${f2(absoluto(B)[0])}, ${f2(absoluto(B)[1])}, ${f2(absoluto(B)[2])}`:`Início ao Fim = ${f3(tot)} m`,m);
+  }
+  if(alfinete){const q=telaDeCelula(alfinete[0],alfinete[1]);if(q){ctx.fillStyle='#e8412c';ctx.beginPath();ctx.arc(q[0],q[1],6,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke()}}
+  if(pts[0]){const q=telaDeCelula(pts[0].i,pts[0].j);if(q){ctx.fillStyle='#f5a623';ctx.beginPath();ctx.arc(q[0],q[1],5,0,7);ctx.fill()}}
+}
+function nota(x,y,html,m){
+  const d=document.createElement('div');d.className='rot med det';d.innerHTML=html;
+  const r=cv.getBoundingClientRect();d.style.left=(r.left+x-60)+'px';d.style.top=(r.top+y)+'px';d.style.pointerEvents='auto';d.style.cursor='pointer';
+  d.onclick=e=>{e.stopPropagation();m.aberto=!m.aberto;desenha()};
+  document.body.appendChild(d);
+}
+function desenhaBussola(){
+  const c=document.getElementById('bussola'),g=c.getContext('2d');g.clearRect(0,0,240,48);
+  g.fillStyle='rgba(246,247,248,.95)';g.beginPath();g.ellipse(120,52,118,48,0,Math.PI,2*Math.PI);g.fill();
+  g.fillStyle='#333';g.font='12px sans-serif';g.textAlign='center';
+  const graus=(yaw*180/Math.PI+360)%360;
+  const nomes={0:'N',45:'NE',90:'L',135:'SE',180:'S',225:'SO',270:'O',315:'NO'};
+  for(let d=-60;d<=60;d+=10){
+    const gg=((Math.round(graus/10)*10+d)%360+360)%360;
+    const x=120+(d-(graus-Math.round(graus/10)*10))*1.8;
+    g.fillRect(x,12,1,6);
+    if(nomes[gg])g.fillText(nomes[gg],x,34);else if(d%20===0)g.fillText(gg,x,34);
+  }
+  g.fillStyle='#f5a623';g.fillRect(119,10,2,28);
+}
+// interação
+
+const pontas=new Map();
+let arr=false,lx=0,ly=0,moveu=0,dPinch=0;
+cv.addEventListener('pointerdown',e=>{
+  pontas.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pontas.size===1){arr=true;lx=e.clientX;ly=e.clientY;moveu=0}
+  cv.setPointerCapture(e.pointerId);
+});
+cv.addEventListener('pointermove',e=>{
+  if(pontas.has(e.pointerId))pontas.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pontas.size>=2){
+    const q=[...pontas.values()];
+    const d=Math.hypot(q[0].x-q[1].x,q[0].y-q[1].y);
+    if(dPinch>0){fov*=dPinch/d;fov=Math.max(FOVMIN,Math.min(FOVMAX,fov));desenha()}
+    dPinch=d;return;
+  }
+  const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  if(arr){const k=fov/ch;yaw+=(e.clientX-lx)*k;pitch+=(e.clientY-ly)*k;pitch=Math.max(-1.5,Math.min(1.5,pitch));lx=e.clientX;ly=e.clientY;moveu++;desenha()}
+  else{const q=ponto3D(x,y);if(q){const a=absoluto(q.p);document.getElementById('bXYZ').innerHTML=`XYZ: <b>${f2(q.p[0])} m, ${f2(q.p[1])} m, ${f2(q.p[2])} m</b>`;document.getElementById('bD').innerHTML=`d: <b>${f2(Math.hypot(...q.p))} m</b>`;window._abs=a}}
+});
+cv.addEventListener('pointerup',e=>{
+  pontas.delete(e.pointerId);
+  if(pontas.size<2)dPinch=0;
+  arr=false;if(moveu>3)return;
+  const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,q=ponto3D(x,y);
+  if(!q){aviso('Sem retorno do laser neste ponto');return}
+  if(medir){
+    pts.push(q);
+    if(pts.length===2){meds.push({a:pts[0].p,b:pts[1].p,ca:[pts[0].i,pts[0].j],cb:[pts[1].i,pts[1].j],aberto:false});pts=[];medir=false;document.getElementById('mMedir').classList.remove('ativo')}
+    desenha();
+  }else{
+    const a=absoluto(q.p);
+    document.getElementById('bXYZ').innerHTML=`E <b>${f2(a[0])}</b> · N <b>${f2(a[1])}</b> · Z <b>${f2(a[2])}</b>`;
+    document.getElementById('bPin').innerHTML=`Alfinete (UTM 22S): <b>${f2(a[0])} , ${f2(a[1])} , ${f2(a[2])}</b>`;
+    alfinete=[q.i,q.j];desenha();
+  }
+});
+cv.addEventListener('pointercancel',e=>{pontas.delete(e.pointerId);dPinch=0;arr=false});
+cv.addEventListener('wheel',e=>{e.preventDefault();fov*=e.deltaY>0?1.1:0.9;fov=Math.max(FOVMIN,Math.min(FOVMAX,fov));desenha()},{passive:false});
+document.getElementById('zIn').onclick=()=>{fov=Math.max(FOVMIN,fov*0.82);desenha()};
+document.getElementById('zOut').onclick=()=>{fov=Math.min(FOVMAX,fov*1.22);desenha()};
+
+function aviso(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2200)}
+document.getElementById('mMedir').onclick=()=>{medir=true;pts=[];document.getElementById('mMedir').classList.add('ativo');aviso('Clique no ponto inicial e depois no final')};
+document.getElementById('mExcluir').onclick=()=>{meds=[];pts=[];desenha()};
+document.getElementById('bBussola').onclick=e=>{e.currentTarget.classList.toggle('on');document.getElementById('bussola').style.display=e.currentTarget.classList.contains('on')?'block':'none'};
+document.getElementById('bOlho').onclick=e=>{e.currentTarget.classList.toggle('on');};
+
+document.getElementById('fecharLat').onclick=()=>{
+  document.getElementById('lat').classList.add('oculto');
+  document.getElementById('cv').classList.add('cheio');
+  document.getElementById('bar').classList.add('cheio');
+  document.getElementById('abrirLat').classList.add('mostra');
+  ajusta();
+};
+document.getElementById('abrirLat').onclick=()=>{
+  document.getElementById('lat').classList.remove('oculto');
+  document.getElementById('cv').classList.remove('cheio');
+  document.getElementById('bar').classList.remove('cheio');
+  document.getElementById('abrirLat').classList.remove('mostra');
+  ajusta();
+};
+document.getElementById('bAplicar').onclick=()=>{salva();document.getElementById('painelCfg').classList.remove('aberto');aviso('Ajuste aplicado e salvo')};
+// painel de configurações
+const pc=document.getElementById('painelCfg');
+document.getElementById('cfg').onclick=()=>pc.classList.toggle('aberto');
+const rBr=document.getElementById('rBr'),rCt=document.getElementById('rCt'),rGm=document.getElementById('rGm');
+function lerCfg(){br=+rBr.value;ct=+rCt.value;gm=rGm.value/100;
+  document.getElementById('vBr').textContent=br;document.getElementById('vCt').textContent=ct;document.getElementById('vGm').textContent=gm.toFixed(2).replace('.',',');
+  aplica();salva()}
+[rBr,rCt,rGm].forEach(r=>r.oninput=lerCfg);
+function salva(){
+  const todas=document.getElementById('cTodas').checked;
+  const cfg={br,ct,gm};
+  try{localStorage.setItem(todas?'dmc_pano_global':'dmc_pano_'+meta.nome,JSON.stringify(cfg))}catch(e){}
+  document.getElementById('estado').textContent=todas?'Ajuste salvo para todas as panorâmicas do projeto':'Ajuste salvo somente para esta panorâmica';
+}
+document.getElementById('cTodas').onchange=salva;
+document.getElementById('bReset').onclick=()=>{rBr.value=0;rCt.value=0;rGm.value=100;lerCfg()};
+document.getElementById('bAuto').onclick=()=>{
+  const [lo,hi]=percentis();
+  // estica o histograma: leva lo->0 e hi->255 via contraste+brilho, e aplica gama suave
+  const meio=(lo+hi)/2;
+  ct=Math.min(100,Math.max(-100,(255/(hi-lo+1)-1)*60));
+  br=Math.min(100,Math.max(-100,(128-meio)/2.55*0.9));
+  gm=1.7;
+  rBr.value=Math.round(br);rCt.value=Math.round(ct);rGm.value=Math.round(gm*100);lerCfg();
+  aviso('Panorâmica clareada automaticamente');
+};
+// restaura ajuste salvo
+(function(){
+  let s=null;try{s=localStorage.getItem('dmc_pano_'+meta.nome)||localStorage.getItem('dmc_pano_global')}catch(e){}
+  if(s){const c=JSON.parse(s);rBr.value=c.br;rCt.value=c.ct;rGm.value=Math.round(c.gm*100);br=c.br;ct=c.ct;gm=c.gm}
+  else{document.getElementById('bAuto').click()}
+})();
+window.addEventListener('resize',ajusta);
+ajusta();aplica();
+})();
+</script>
+</body>
+</html>
