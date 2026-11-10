@@ -71,8 +71,9 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 #mapaCard .coord b{color:#111}
 #mapaCard a{display:inline-block;margin-top:8px;background:#1f7a3a;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:8px 14px;border-radius:7px}
 .pinoDmc{position:relative;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45))}
-.pinoCabeca{position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 30% 28%,#5fd07d,#1f7a3a 70%);border:3px solid #fff;box-sizing:border-box;display:flex;align-items:center;justify-content:center;color:#fff;font:700 10px/1 Inter,system-ui,sans-serif}
-.pinoPonta{position:absolute;left:50%;top:31px;transform:translateX(-50%);width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:17px solid #fff}
+.pinoCabeca{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:#fff;border:2px solid #fff;box-sizing:border-box;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.pinoCabeca img{width:100%;height:100%;object-fit:cover;display:block}
+.pinoPonta{position:absolute;left:50%;top:33px;transform:translateX(-50%);width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:17px solid #fff}
 .leaflet-popup-content{font-family:Inter,system-ui,sans-serif;font-size:12.5px;line-height:1.5;margin:10px 12px}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -372,7 +373,7 @@ async function abreMapa(){
     const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapa);
     const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(mapa);
     L.control.layers({'Satélite':sat,'Mapa':osm},{},{position:'topright'}).addTo(mapa);
-    const icon=L.divIcon({className:'pinoDmc',html:'<div class="pinoCabeca">DMC</div><div class="pinoPonta"></div>',iconSize:[34,48],iconAnchor:[17,48],popupAnchor:[0,-46]});
+    const icon=L.divIcon({className:'pinoDmc',html:'<div class="pinoCabeca"><img src="logo_pino.png" alt="DMC"></div><div class="pinoPonta"></div>',iconSize:[36,50],iconAnchor:[18,50],popupAnchor:[0,-48]});
     L.marker([geo.lat,geo.lon],{icon}).addTo(mapa).bindPopup(`<b>${meta.nome}</b><br>E ${f2(geo.E)} · N ${f2(geo.N)}<br>Cota ${f2(geo.Z)} m`).openPopup();
     mapaPronto=true;
   }
