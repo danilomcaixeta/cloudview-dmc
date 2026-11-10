@@ -369,8 +369,8 @@ async function abreMapa(){
   if(!geo){document.getElementById('mapaCoord').textContent='Coordenada não disponível';return}
   if(!mapaPronto&&window.L){
     mapa=L.map('mapa',{zoomControl:true,attributionControl:false}).setView([geo.lat,geo.lon],18);
-    const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(mapa);
     const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapa);
+    const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(mapa);
     L.control.layers({'Satélite':sat,'Mapa':osm},{},{position:'topright'}).addTo(mapa);
     const icon=L.divIcon({className:'pinoDmc',html:'<div class="pinoCabeca">DMC</div><div class="pinoPonta"></div>',iconSize:[34,48],iconAnchor:[17,48],popupAnchor:[0,-46]});
     L.marker([geo.lat,geo.lon],{icon}).addTo(mapa).bindPopup(`<b>${meta.nome}</b><br>E ${f2(geo.E)} · N ${f2(geo.N)}<br>Cota ${f2(geo.Z)} m`).openPopup();
