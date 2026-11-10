@@ -370,8 +370,8 @@ async function abreMapa(){
   if(!geo){document.getElementById('mapaCoord').textContent='Coordenada não disponível';return}
   if(!mapaPronto&&window.L){
     mapa=L.map('mapa',{zoomControl:true,attributionControl:false}).setView([geo.lat,geo.lon],18);
-    const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapa);
-    const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(mapa);
+    const osm=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'}).addTo(mapa);
+    const sat=L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'}).addTo(mapa);
     L.control.layers({'Satélite':sat,'Mapa':osm},{},{position:'topright'}).addTo(mapa);
     const icon=L.divIcon({className:'pinoDmc',html:'<div class="pinoCabeca"><img src="logo_pino.png" alt="DMC"></div><div class="pinoPonta"></div>',iconSize:[36,50],iconAnchor:[18,50],popupAnchor:[0,-48]});
     L.marker([geo.lat,geo.lon],{icon}).addTo(mapa).bindPopup(`<b>${meta.nome}</b><br>E ${f2(geo.E)} · N ${f2(geo.N)}<br>Cota ${f2(geo.Z)} m`).openPopup();
