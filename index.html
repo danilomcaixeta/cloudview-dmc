@@ -536,7 +536,6 @@ function tampaNadir(W,H){
 // =====================================================================
 let CENA=null;            // setup atual (do indice)
 let VIZ=[];               // vizinhos com direcao no panorama e visibilidade
-const RAIO_VIZ=45;        // metros: ate onde procurar vizinhos
 const caixaPinos=document.getElementById('pinos');
 
 // direcao no MUNDO (dE,dN,dZ) -> direcao no sistema do panorama (calibrado: eixos Y,Z,X com sinais -,+,-)
@@ -557,40 +556,60 @@ function alcanceLaser(az,el){
   return melhor;
 }
 
+const RAIO_VIZ=28;        // metros em planta: alem disso o pino fica minusculo e confunde
 function calculaVizinhos(){
   VIZ=[];
   if(!CENA||!GYN||!PGX)return;
+  // referencia: scanner da cena atual e o chao sob ele
+  const hsAtual=(typeof CENA.hs==='number')?CENA.hs:1.2;
+  const zChaoAtual=CENA.Z-hsAtual;
   for(const v of GYN.setups){
     if(v.nome===CENA.nome)continue;
-    const dE=v.E-CENA.E, dN=v.N-CENA.N, dZ=v.Z-CENA.Z;
-    const dist=Math.hypot(dE,dN,dZ);
-    if(dist>RAIO_VIZ||dist<0.8)continue;
+    const dE=v.E-CENA.E, dN=v.N-CENA.N;
+    const plan=Math.hypot(dE,dN);
+    if(plan>RAIO_VIZ||plan<0.8)continue;
+    // so o mesmo andar: o chao do vizinho precisa estar proximo do chao da cena atual
+    const zChaoViz=(typeof v.zc==='number')?v.zc:(v.Z-1.2);
+    if(Math.abs(zChaoViz-zChaoAtual)>1.6)continue;
+    // o pino fica NO CHAO sob o scanner vizinho (como no WebShare), nao no ar
+    const dZ=zChaoViz-CENA.Z;                 // relativo ao centro da cena atual
+    const dist=Math.hypot(plan,dZ);
     const [px,py,pz]=dirPano(dE,dN,dZ);
     const az=Math.atan2(px,pz), el=Math.atan2(py,Math.hypot(px,pz));
+    // oclusao: o laser precisa chegar ate o ponto do chao do vizinho
     const alc=alcanceLaser(az,el);
-    // visivel se o laser chega ate (quase) o setup; parede antes = oculto
-    const livre=(alc===null)||(alc>=dist-0.9)||(alc>=dist*0.88);
+    const livre=(alc===null)||(alc>=dist-0.9)||(alc>=dist*0.9);
     if(!livre)continue;
-    VIZ.push({nome:v.nome,dist,az,el,dir:[Math.sin(az)*Math.cos(el),Math.sin(el),Math.cos(az)*Math.cos(el)],setup:v});
+    VIZ.push({nome:v.nome,dist,plan,az,el,dir:[Math.sin(az)*Math.cos(el),Math.sin(el),Math.cos(az)*Math.cos(el)],setup:v});
   }
+  // mais perto por ultimo (desenhado por cima) e no maximo 40 pinos
+  VIZ.sort((a,b)=>a.dist-b.dist);
+  if(VIZ.length>40)VIZ.length=40;
   desenhaPinos();
 }
 
 function desenhaPinos(){
   if(!caixaPinos)return;
-  if(!VIZ.length){caixaPinos.innerHTML='';return}
-  const html=[];
+  if(!CFG.pinos||!VIZ.length){caixaPinos.innerHTML='';return}
+  const html=[]; const usados=[];
+  const maxD=CFG.dist>0?CFG.dist:RAIO_VIZ;
   for(const q of VIZ){
+    if(q.plan>maxD)continue;
     const pt=projDir(q.dir[0],q.dir[1],q.dir[2]);
     if(!pt)continue;
     if(pt[0]<-30||pt[0]>cw+30||pt[1]<-30||pt[1]>ch+30)continue;
-    // tamanho e transparencia conforme a distancia (perto = grande)
-    const t=Math.max(0,Math.min(1,1-(q.dist-1.5)/30));
-    const tam=Math.round(16+t*34);
-    const op=(0.45+0.55*t).toFixed(2);
-    html.push(`<div class="pinoV" data-n="${q.nome.replace(/"/g,'&quot;')}" style="left:${pt[0].toFixed(0)}px;top:${pt[1].toFixed(0)}px;opacity:${op};z-index:${Math.round(100-q.dist)}">
+    // tamanho proporcional a 1/distancia (perto = grande), com limites
+    const t=Math.max(0,Math.min(1,1-(q.dist-2)/(RAIO_VIZ-2)));
+    const tam=Math.round(14+t*30);
+    const op=(0.5+0.5*t).toFixed(2);
+    // evita rotulos sobrepostos: so mostra o nome se nao colide com outro ja mostrado
+    const caixa=[pt[0]-50,pt[1]+4,pt[0]+50,pt[1]+20];
+    const colide=usados.some(u=>!(caixa[2]<u[0]||caixa[0]>u[2]||caixa[3]<u[1]||caixa[1]>u[3]));
+    const mostraNome=!colide||q.dist<6;
+    if(mostraNome)usados.push(caixa);
+    html.push(`<div class="pinoV" data-n="${q.nome.replace(/"/g,'&quot;')}" style="left:${pt[0].toFixed(0)}px;top:${pt[1].toFixed(0)}px;opacity:${op};z-index:${Math.round(1000-q.dist*10)}" title="${q.nome} · ${q.dist.toFixed(1).replace('.',',')} m">
       <svg width="${tam}" height="${Math.round(tam*1.35)}" viewBox="0 0 24 32"><path d="M12 1C6 1 2 5.5 2 11c0 7 10 20 10 20s10-13 10-20C22 5.5 18 1 12 1z" fill="#f4f5f6" stroke="#6b7076" stroke-width="1.6"/><circle cx="12" cy="11" r="4.6" fill="#8d9298"/></svg>
-      <span>${q.nome}</span></div>`);
+      ${mostraNome?`<span>${q.nome}</span>`:''}</div>`);
   }
   caixaPinos.innerHTML=html.join('');
 }
