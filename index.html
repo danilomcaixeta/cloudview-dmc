@@ -104,6 +104,16 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 .pInfo b{display:block;font-size:14px;color:#222;margin-bottom:3px}
 .pInfo span{display:block;font-size:12px;color:#666;line-height:1.5}
 .pInfo .tag{display:inline-block;margin-top:5px;background:#e8f4fa;color:#1f78a0;border-radius:4px;padding:2px 7px;font-size:11px}
+
+#telaVisao{position:fixed;inset:0;background:#00ff7f;z-index:61;display:none;flex-direction:column}
+#telaVisao.aberta{display:flex}
+#visaoTopo{flex:0 0 auto;background:#fff;border-bottom:1px solid #d6d9dc;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
+#visaoTopo b{font:600 13px Inter,system-ui,sans-serif;color:#222}
+#fechaVisao{border:0;background:transparent;font-size:22px;cursor:pointer;color:#444;padding:4px 8px}
+#mapaVisao{flex:1;position:relative;background:#16e57a}
+#visaoLegenda{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.88);font:12px Inter,system-ui,sans-serif;color:#333;padding:6px 12px;display:flex;justify-content:space-between;z-index:1000}
+.bolha{background:rgba(70,45,200,.78);border:2px solid rgba(40,30,160,.9);border-radius:50%;color:#fff;font:700 15px/1 Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px rgba(90,70,220,.25)}
+.pinoRoxo{background:none;border:0}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -134,7 +144,7 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 <div id="lat">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 10px 10px 16px;border-bottom:1px solid #d6d9dc"><h3 style="padding:0;border:0;font-size:13px">Cloud View DMC</h3><button id="fecharLat" title="Recolher painel">&raquo;</button></div>
   <div class="item" id="mProjetos"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="8" height="16"/><path d="M14 6h7M14 12h7M14 18h7"/></svg>Projetos</div>
-  <div class="item" id="mMapa"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg>Projeto</div>
+  <div class="item" id="mMapa"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg>Mapa de visão geral</div>
   <div class="item ativo" id="mVarr"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>Visualização de Varreduras</div>
   <div class="item" id="mMedir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17l10-10"/></svg>Medir a distância</div>
   <div class="item" id="mExcluir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Excluir</div>
@@ -144,6 +154,11 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 <div id="zoomBox"><button id="zIn" title="Aproximar">+</button><button id="zOut" title="Afastar">&minus;</button></div>
 <div id="bar"><span id="bNome">—</span><span id="bXYZ">XYZ: —</span><span id="bData">—</span><span id="bQual">Qualidade: Alta</span><span id="bPin">Alfinete: —</span><span id="bD">d: —</span></div>
 <div id="toast"></div>
+<div id="telaVisao">
+  <div id="visaoTopo"><b>Mapa de visão geral</b><button id="fechaVisao" title="Fechar">&times;</button></div>
+  <div id="mapaVisao"></div>
+  <div id="visaoLegenda"><span>Setups: <b id="vgN">1</b></span><span id="vgCoord">—</span></div>
+</div>
 <div id="telaMapa">
   <div id="mapaTopo"><b id="tituloProj">Projeto: DMC-PARKCENTER</b><button id="fechaMapa" title="Fechar">&times;</button></div>
   <div id="projScroll">
@@ -443,7 +458,60 @@ document.getElementById('vLista').onclick=()=>{document.getElementById('projCard
 document.getElementById('vGrade').onclick=()=>{document.getElementById('projCards').className='grade';document.getElementById('vGrade').classList.add('on');document.getElementById('vLista').classList.remove('on')};
 document.getElementById('fechaMapa').onclick=()=>document.getElementById('telaMapa').classList.remove('aberta');
 document.getElementById('mProjetos').onclick=abreMapa;
-document.getElementById('mMapa').style.display='none';
+
+// ---------- MAPA DE VISAO GERAL (nuvem em vista superior) ----------
+let vg=null,vgPronto=false,vgGrupos=null,vgTopo=null;
+function clusterizar(pts,raio){
+  // agrupamento por distancia em pixels no zoom atual
+  const gs=[];
+  pts.forEach(p=>{
+    const pp=vg.latLngToContainerPoint([p.lat,p.lon]);
+    let g=gs.find(g=>Math.hypot(g.px-pp.x,g.py-pp.y)<raio);
+    if(g){g.itens.push(p);g.px=(g.px*(g.itens.length-1)+pp.x)/g.itens.length;g.py=(g.py*(g.itens.length-1)+pp.y)/g.itens.length}
+    else gs.push({px:pp.x,py:pp.y,itens:[p]});
+  });
+  return gs;
+}
+function redesenhaVG(){
+  if(!vg)return;
+  if(vgGrupos)vgGrupos.clearLayers(); else vgGrupos=L.layerGroup().addTo(vg);
+  clusterizar(proj.setups,46).forEach(g=>{
+    const ll=vg.containerPointToLatLng([g.px,g.py]);
+    if(g.itens.length>1){
+      const ic=L.divIcon({className:'',html:'<div class="bolha" style="width:38px;height:38px">'+g.itens.length+'</div>',iconSize:[38,38],iconAnchor:[19,19]});
+      L.marker(ll,{icon:ic}).on('click',()=>vg.setView(ll,vg.getZoom()+2)).addTo(vgGrupos);
+    }else{
+      const st=g.itens[0];
+      const ic=L.divIcon({className:'pinoRoxo',html:'<div class="pinoWrap"><div class="pinoSombra"></div><div class="pinoGota"></div><div class="pinoGlobo"></div><div class="pinoEtiq">'+st.nome+'</div></div>',iconSize:[120,92],iconAnchor:[60,57]});
+      L.marker([st.lat,st.lon],{icon:ic}).on('click',()=>{document.getElementById('telaVisao').classList.remove('aberta')}).addTo(vgGrupos);
+    }
+  });
+}
+async function abreVisao(){
+  document.getElementById('telaVisao').classList.add('aberta');
+  if(!proj){try{proj=await (await fetch('projeto.json')).json()}catch(e){}}
+  if(!proj)return;
+  document.getElementById('vgN').textContent=proj.setups.length;
+  const st0=proj.setups[0];
+  document.getElementById('vgCoord').textContent='E '+st0.E.toFixed(3).replace('.',',')+' · N '+st0.N.toFixed(3).replace('.',',')+' · UTM 22S';
+  if(!vgPronto&&window.L){
+    vg=L.map('mapaVisao',{zoomControl:true,attributionControl:false,zoomSnap:0.5,maxZoom:24}).setView([st0.lat,st0.lon],20);
+    // vista superior da nuvem: sobreposta como imagem georreferenciada em UTM->lat/lon
+    const tm=await (await fetch('topo_meta.json')).json();
+    const pr=(E,N)=>{ // UTM 22S -> lat/lon por diferenca local (valido para areas pequenas)
+      const dE=E-st0.E, dN=N-st0.N;
+      const dLat=dN/110574.0, dLon=dE/(111320.0*Math.cos(st0.lat*Math.PI/180));
+      return [st0.lat+dLat, st0.lon+dLon];
+    };
+    const sw=pr(tm.x0,tm.y0), ne=pr(tm.x1,tm.y1);
+    vgTopo=L.imageOverlay('topo_L1COLCCI05.png',[sw,ne],{opacity:1}).addTo(vg);
+    vg.on('zoomend moveend',redesenhaVG);
+    vgPronto=true;
+  }
+  setTimeout(()=>{vg.invalidateSize();redesenhaVG()},200);
+}
+document.getElementById('mMapa').onclick=abreVisao;
+document.getElementById('fechaVisao').onclick=()=>document.getElementById('telaVisao').classList.remove('aberta');
 // painel de configurações
 const pc=document.getElementById('painelCfg');
 document.getElementById('cfg').onclick=()=>pc.classList.toggle('aberto');
