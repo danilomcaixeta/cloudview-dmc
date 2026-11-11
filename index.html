@@ -429,7 +429,8 @@ body.emVarreduras #nomeScan{display:inline}
   <div id="pisoBar"></div>
   <div id="mapaVisao"></div>
   <div id="visaoDetalhe"></div>
-  <div id="painelCamadas">
+  <div id="ortoSt" style="position:absolute;left:14px;top:60px;z-index:1001;background:#fff;border:1px solid #ccc;border-radius:4px;padding:4px 8px;font:11px monospace;color:#333;display:none">orto</div>
+<div id="painelCamadas">
   <button data-c="orto" class="on">Vista superior</button>
   <button data-c="mapa" class="on">Mapa</button>
   <button data-c="sat">Satélite</button>
@@ -1638,21 +1639,24 @@ function atualizaBarraElev(){
 }
 // camada do mosaico (vista superior real gerada de cada setup)
 let vgOrto=null, vgQualPiso=null;
+function st(t){const e=document.getElementById('ortoSt');if(e){e.style.display='block';e.textContent=t}}
 async function carregaOrto(forca){
   if(!vg)return;
-  if(!window._MOS){try{window._MOS=await (await fetch(arq('mosaico/mosaicos.json'))).json()}catch(e){return}}
+  if(!window._MOS){try{window._MOS=await (await fetch(arq('mosaico/mosaicos.json'))).json();st('MOS ok: '+Object.keys(window._MOS).length+' pisos')}catch(e){st('MOS FALHOU: '+e.message);return}}
   const alvo=(pisoAtivo==='Todos')?null:(window._MOS[pisoAtivo]?pisoAtivo:null);   // a vista superior e sempre a do piso escolhido
   if(vgOrto&&vgQualPiso===alvo&&!forca)return;
   if(vgOrto){vg.removeLayer(vgOrto);vgOrto=null}
   vgQualPiso=alvo;
-  if(!alvo||!CFG.orto)return;
+  if(!alvo){st('sem mosaico para piso='+pisoAtivo);return}
+  if(!CFG.orto){st('orto desligado em CFG');return}
   const m=window._MOS[alvo];
   if(!m)return;
   // dois cantos opostos: noroeste (E0,N1) e sudeste (E1,N0)
   const no=utmParaLatLon(m.E0,m.N1), se=utmParaLatLon(m.E1,m.N0);
   vgOrto=L.imageOverlay(arq('mosaico/'+m.arq),[[no[0],no[1]],[se[0],se[1]]],
     {opacity:0.95,interactive:false}).addTo(vg);
-  vgOrto.on('error',()=>{console.warn('mosaico falhou',m.arq)});
+  vgOrto.on('load',()=>st('orto OK '+alvo+' bounds '+no[0].toFixed(5)+','+se[1].toFixed(5)));
+  vgOrto.on('error',()=>st('orto ERRO '+m.arq));
   return [[no[0],no[1]],[se[0],se[1]]];
 }
 // enquadra a vista superior do piso escolhido
