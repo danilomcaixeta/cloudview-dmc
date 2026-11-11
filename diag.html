@@ -1,0 +1,32 @@
+<!doctype html><meta charset="utf-8"><title>diag</title>
+<body style="font:13px monospace;padding:12px;background:#fff">
+<div id="out">testando...</div>
+<script>
+const R2BASE='https://pub-4124c0d235a343278f1e6c5bbdb2c539.r2.dev/dcm/gyn-shop/';
+const arq=p=>R2BASE+p.split('/').map(encodeURIComponent).join('/');
+const log=m=>document.getElementById('out').insertAdjacentHTML('beforeend','<div>'+m+'</div>');
+(async()=>{
+ try{
+  const g=await (await fetch('setups.json?t='+Date.now())).json();
+  log('indice: '+g.total+' cenas, processadas '+g.processadas);
+  const nome='G2DOCA- G2DOCA035';
+  const s=g.setups.find(x=>x.nome===nome);
+  log('achou no indice: '+!!s+' | dados='+(s&&s.dados));
+  const url=arq('panos/'+nome+'.jpg');
+  log('url pano: '+url);
+  const r=await fetch(url);
+  log('fetch pano: '+r.status+' | cors: '+r.type);
+  const im=new Image(); im.crossOrigin='anonymous';
+  await new Promise((res,rej)=>{im.onload=res;im.onerror=rej;im.src=url;});
+  log('imagem ok: '+im.naturalWidth+'x'+im.naturalHeight);
+  const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight;
+  const cx=c.getContext('2d'); cx.drawImage(im,0,0);
+  const d=cx.getImageData(0,0,10,10).data;
+  log('getImageData OK, primeiro pixel '+d[0]);
+  const rg=await fetch(arq('dados/'+nome+'.json'));
+  log('grade json: '+rg.status);
+  const rb=await fetch(arq('dados/'+nome+'.bin.gz'));
+  log('grade bin: '+rb.status);
+ }catch(e){ log('ERRO: '+e.name+' - '+e.message); }
+})();
+</script>
