@@ -256,7 +256,7 @@ async function carregaGrade(nome){
 // troca o panorama exibido (chamado pela vista superior)
 async function carregaPano(nome){
   try{
-    const im=new Image(); im.src=arq('panos/'+nome+'.jpg');
+    const im=new Image(); im.crossOrigin='anonymous'; im.src=arq('panos/'+nome+'.jpg');
     await im.decode();
     W=im.naturalWidth; H=im.naturalHeight; N=W*H;
     aux.width=W; aux.height=H;
@@ -528,7 +528,7 @@ function desenhaCards(){
   const c=document.createElement('div');c.className='pCard';
   const tot=(GYN&&GYN.total_projeto)||proj.setups.length;
   const feitas=(GYN&&(GYN.processadas||GYN.setups.length))||proj.setups.length;
-  c.innerHTML=`<img src="${arq(proj.setups[0].thumb)}" alt=""><div class="pInfo"><b>${proj.projeto}</b><span>${proj.cliente||''}</span><span>${feitas} de ${tot} varreduras processadas</span><span class="tag">UTM 22S</span><button class="btnAbrir">Abrir projeto</button></div>`;
+  c.innerHTML=`<img crossorigin="anonymous" src="${arq(proj.setups[0].thumb)}" alt=""><div class="pInfo"><b>${proj.projeto}</b><span>${proj.cliente||''}</span><span>${feitas} de ${tot} varreduras processadas</span><span class="tag">UTM 22S</span><button class="btnAbrir">Abrir projeto</button></div>`;
   c.onclick=abreOProjeto;
   box.appendChild(c);
 }
