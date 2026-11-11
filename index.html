@@ -263,17 +263,17 @@ async function carregaPano(nome){
   }catch(e){aviso('Panorama não encontrado: '+nome)}
 }
 window.abrePano=carregaPano;
-{const q=new URLSearchParams(location.search).get('cena'); if(q) setTimeout(()=>carregaPano(q),400);}
+window._cenaURL=new URLSearchParams(location.search).get('cena');
 // tela principal e sempre Projetos; a cena carrega em segundo plano
-setTimeout(()=>{try{abreMapa()}catch(e){}},60);
+if(!window._cenaURL) setTimeout(()=>{try{abreMapa()}catch(e){}},60);
 // abre a ultima cena visitada (ou a primeira do projeto) em segundo plano
 (async()=>{try{
   const g=await (await fetch('setups.json')).json();
   const ok=(g.setups||[]).filter(x=>x.dados);
   if(!ok.length)return;
-  const alvo=localStorage.getItem('dmc_pano')||ok[0].nome;
+  const alvo=window._cenaURL||localStorage.getItem('dmc_pano')||ok[0].nome;
   const tem=await fetch('dados/'+encodeURIComponent(alvo)+'.json');
-  if(tem.ok) await carregaPano(alvo);
+  if(tem.ok||window._cenaURL) await carregaPano(alvo);
 }catch(e){}})();
 
 // câmera
@@ -522,15 +522,14 @@ async function abreMapa(){
     mapa=L.map('mapa',{zoomControl:true,attributionControl:false}).setView([-15.5,-52],4);
     camadaOsm=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'}).addTo(mapa);
     camadaSat=L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'});
-    // 1 pino por setup (o projeto aparece no mapa geral pelo 1o setup)
-    proj.setups.forEach(st=>{
-      const mk=L.marker([st.lat,st.lon],{icon:iconePino(st.nome)}).addTo(mapa)
-        .bindPopup(`<b>${st.nome}</b><br>E ${st.E.toFixed(3).replace('.',',')} · N ${st.N.toFixed(3).replace('.',',')}<br>Cota ${st.Z.toFixed(3).replace('.',',')} m<br><a href="https://www.google.com/maps/search/?api=1&query=${st.lat},${st.lon}" target="_blank" rel="noopener" style="color:#1f7a3a;font-weight:600">Abrir no Google Maps</a>`);
-      marcadores.push(mk);
-    });
+    // 1 pino por PROJETO (no centro dos setups); os setups individuais ficam no "Abrir projeto"
+    const la=proj.setups.map(x=>x.lat).sort((a,b)=>a-b),lo=proj.setups.map(x=>x.lon).sort((a,b)=>a-b);
+    const cLat=la[la.length>>1],cLon=lo[lo.length>>1];
+    const mk=L.marker([cLat,cLon],{icon:iconePino(proj.projeto)}).addTo(mapa)
+      .on('click',abreOProjeto);
+    marcadores.push(mk);
     mapaPronto=true;
-    const pts=proj.setups.map(x=>[x.lat,x.lon]);
-    setTimeout(()=>{mapa.invalidateSize();mapa.flyToBounds(L.latLngBounds(pts).pad(0.4),{maxZoom:17,duration:1.6})},500);
+    setTimeout(()=>{mapa.invalidateSize();mapa.flyTo([cLat,cLon],16,{duration:1.4})},500);
   }
   desenhaCards();
   setTimeout(()=>{if(mapa)mapa.invalidateSize()},150);
