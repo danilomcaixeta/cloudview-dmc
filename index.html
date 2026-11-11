@@ -1651,7 +1651,7 @@ async function carregaOrto(forca){
   // dois cantos opostos: noroeste (E0,N1) e sudeste (E1,N0)
   const no=utmParaLatLon(m.E0,m.N1), se=utmParaLatLon(m.E1,m.N0);
   vgOrto=L.imageOverlay(arq('mosaico/'+m.arq),[[no[0],no[1]],[se[0],se[1]]],
-    {opacity:0.95,interactive:false,pane:'ortoPane'}).addTo(vg);
+    {opacity:0.95,interactive:false}).addTo(vg);
   vgOrto.on('error',()=>{console.warn('mosaico falhou',m.arq)});
   return [[no[0],no[1]],[se[0],se[1]]];
 }
@@ -1739,12 +1739,14 @@ async function abreVisao(){
     // fundo de mapa (a pessoa ve onde fica a cena) e um painel proprio para a vista superior
     vgBase=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'}).addTo(vg);
     vgSat=L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'});
-    vg.createPane('ortoPane'); vg.getPane('ortoPane').style.zIndex=350;
-    vg.createPane('ortoPane2'); vg.getPane('ortoPane2').style.zIndex=340;
+
     vg.on('zoomend moveend',redesenhaVG);
     vgPronto=true;
   }
-  document.getElementById('painelCamadas').classList.add('vendo');
+  const pc2=document.getElementById('painelCamadas'); pc2.classList.add('vendo');
+  pc2.querySelector('[data-c=orto]').classList.toggle('on',CFG.orto);
+  pc2.querySelector('[data-c=mapa]').classList.toggle('on',!!vgBase&&!!vg.hasLayer(vgBase));
+  pc2.querySelector('[data-c=sat]').classList.toggle('on',!!vgSat&&!!vg.hasLayer(vgSat));
   setTimeout(()=>{vg.invalidateSize();redesenhaVG();ajusta();carregaOrto(true).then(b=>{if(b)vg.fitBounds(L.latLngBounds(b).pad(0.08),{animate:false})})},300);
 }
 document.getElementById('mMapa').onclick=abreVisao;
