@@ -277,12 +277,12 @@ window._cenaURL=new URLSearchParams(location.search).get('cena');
 if(!window._cenaURL) setTimeout(()=>{try{abreMapa()}catch(e){}},60);
 // abre a ultima cena visitada (ou a primeira do projeto) em segundo plano
 (async()=>{try{
-  const g=await (await fetch('setups.json')).json();
+  const g=await (await fetch('setups.json?t='+Date.now())).json();
   const ok=(g.setups||[]).filter(x=>x.dados);
-  if(!ok.length)return;
-  const alvo=window._cenaURL||localStorage.getItem('dmc_pano')||ok[0].nome;
-  const tem=await fetch(arq('dados/'+alvo+'.json'));
-  if(tem.ok||window._cenaURL) await carregaPano(alvo);
+  const alvo=window._cenaURL||localStorage.getItem('dmc_pano')||(ok[0]&&ok[0].nome);
+  if(!alvo)return;
+  if(!ok.some(x=>x.nome===alvo)&&!window._cenaURL)return;
+  await carregaPano(alvo);
 }catch(e){}})();
 
 // câmera
