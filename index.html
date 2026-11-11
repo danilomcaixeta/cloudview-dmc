@@ -267,6 +267,9 @@ body.latOculta #telaVisao{right:0}
   </div>
 </div>
 <script>
+// tampa preta do nadir: esconde o tripu e a distorcao do piso
+// NADIR = fracao da altura da imagem coberta (0.26 = ~47 graus em torno do nadir)
+const NADIR=parseFloat(new URLSearchParams(location.search).get('nadir'))||0.26;
 // ---- base dos arquivos pesados: Cloudflare R2 (o GitHub guarda so o software) ----
 const R2BASE='https://pub-4124c0d235a343278f1e6c5bbdb2c539.r2.dev/dcm/gyn-shop/';
 const R2V='2';  // sobe quando precisar furar cache antigo dos arquivos
@@ -336,6 +339,20 @@ async function carregaGrade(nome){
 }
 
 // troca o panorama exibido (chamado pela vista superior)
+
+// pinta de preto a regiao do nadir (base do panorama), com transicao suave
+function tampaNadir(W,H){
+  const alt=Math.round(H*NADIR);          // altura da faixa coberta
+  if(alt<=0)return;
+  const y0=H-alt;                          // onde a tampa comeca
+  const fade=Math.round(alt*0.18);         // transicao suave
+  const g=ax.createLinearGradient(0,y0,0,y0+fade);
+  g.addColorStop(0,'rgba(0,0,0,0)');
+  g.addColorStop(1,'rgba(0,0,0,1)');
+  ax.fillStyle=g; ax.fillRect(0,y0,W,fade);
+  ax.fillStyle='#000'; ax.fillRect(0,y0+fade,W,H-(y0+fade));
+}
+
 async function carregaPano(nome){
   try{
     const im=new Image(); im.crossOrigin='anonymous'; im.src=arq('panos/'+nome+'.jpg');
@@ -343,6 +360,7 @@ async function carregaPano(nome){
     W=im.naturalWidth; H=im.naturalHeight; N=W*H;
     aux.width=W; aux.height=H;
     ax.clearRect(0,0,W,H); ax.drawImage(im,0,0);
+    tampaNadir(W,H);
     orig=ax.getImageData(0,0,W,H);
     out=ax.createImageData(W,H);
     gv=new Uint8Array(N).fill(1);          // percentis consideram toda a imagem
