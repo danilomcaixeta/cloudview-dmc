@@ -491,11 +491,14 @@ async function abreVisao(){
   document.getElementById('telaVisao').classList.add('aberta');
   if(!proj){try{proj=await (await fetch('projeto.json')).json()}catch(e){}}
   if(!proj)return;
+  const demo=parseInt(new URLSearchParams(location.search).get('demo')||'0');
+  if(demo>0&&!proj._demo){proj._demo=1;const b0=proj.setups[0];let sd=7;const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280};
+    for(let i=0;i<demo;i++){const ang=rnd()*6.283,r=rnd()*0.0012;proj.setups.push({nome:'DEMO_'+String(i+1).padStart(3,'0'),lat:b0.lat+Math.sin(ang)*r,lon:b0.lon+Math.cos(ang)*r,E:b0.E,N:b0.N,Z:b0.Z,data:b0.data,thumb:b0.thumb})}}
   document.getElementById('vgN').textContent=proj.setups.length;
   const st0=proj.setups[0];
   document.getElementById('vgCoord').textContent='E '+st0.E.toFixed(3).replace('.',',')+' · N '+st0.N.toFixed(3).replace('.',',')+' · UTM 22S';
   if(!vgPronto&&window.L){
-    vg=L.map('mapaVisao',{zoomControl:true,attributionControl:false,zoomSnap:0.5,maxZoom:24}).setView([st0.lat,st0.lon],20);
+    vg=L.map('mapaVisao',{zoomControl:true,attributionControl:false,zoomSnap:0.5,maxZoom:24}).setView([st0.lat,st0.lon],demo>0?17:20);
     // vista superior da nuvem: sobreposta como imagem georreferenciada em UTM->lat/lon
     const tm=await (await fetch('topo_meta.json')).json();
     const pr=(E,N)=>{ // UTM 22S -> lat/lon por diferenca local (valido para areas pequenas)
