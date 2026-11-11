@@ -188,7 +188,8 @@ body.latOculta #telaVisao{right:0}
 <script>
 // ---- base dos arquivos pesados: Cloudflare R2 (o GitHub guarda so o software) ----
 const R2BASE='https://pub-4124c0d235a343278f1e6c5bbdb2c539.r2.dev/dcm/gyn-shop/';
-function arq(p){ if(!R2BASE) return p; return R2BASE + p.split('/').map(encodeURIComponent).join('/'); }
+const R2V='2';  // sobe quando precisar furar cache antigo dos arquivos
+function arq(p){ if(!R2BASE) return p; return R2BASE + p.split('/').map(encodeURIComponent).join('/')+'?v='+R2V; }
 
 window.addEventListener('error',e=>{const d=document.getElementById('dica');if(d)d.textContent='ERRO: '+e.message+' @'+(e.lineno||'')});
 window.addEventListener('unhandledrejection',e=>{const d=document.getElementById('dica');if(d)d.textContent='ERRO: '+(e.reason&&e.reason.message||e.reason)});
