@@ -274,7 +274,7 @@ body.latOculta #telaMapa{right:0}
 .pInfo span{display:block;font-size:12px;color:#666;line-height:1.5}
 .pInfo .tag{display:inline-block;margin-top:5px;background:#e8f4fa;color:#1f78a0;border-radius:4px;padding:2px 7px;font-size:11px}
 
-#telaVisao{position:fixed;inset:0;right:260px;bottom:28px;background:#eef0f1;z-index:11;display:none;flex-direction:column}
+#telaVisao{position:fixed;inset:0;right:260px;bottom:28px;background:#eef0f1;z-index:16;display:none;flex-direction:column}
 body.latOculta #telaVisao{right:0}
 @media (max-width:700px){#telaVisao{right:150px}}
 #telaVisao.aberta{display:flex}
@@ -1718,6 +1718,8 @@ document.addEventListener('click',e=>{
 });
 
 async function abreVisao(){
+  document.body.classList.remove('emProjetos','emVarreduras');
+  ['telaMapa','telaConteudo','telaCfg'].forEach(i=>{const e=document.getElementById(i);if(e)e.classList.remove('aberta')});
   document.body.classList.remove('emVarreduras');
   // o menu lateral faz parte da tela: garante que esta aberto
   document.body.classList.remove('latOculta');
