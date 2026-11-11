@@ -698,7 +698,7 @@ function abreConteudo(){
   ['mProjetos','mMapa','mVarr'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
   document.getElementById('mConteudo').classList.add('ativo');
   document.getElementById('telaConteudo').classList.add('aberta');
-  (async()=>{ if(!GYN){try{GYN=await (await fetch('setups.json?t='+Date.now())).json()}catch(e){}} ctRender(); })();
+  (async()=>{ if(!GYN){try{GYN=await (await fetch('setups_v2.json?t='+Date.now())).json()}catch(e){}} ctRender(); })();
 }
 function fechaConteudo(){document.getElementById('telaConteudo').classList.remove('aberta');document.getElementById('mConteudo').classList.remove('ativo')}
 document.getElementById('mConteudo').onclick=abreConteudo;
@@ -902,7 +902,7 @@ async function carregaPano(nome){
     try{await carregaGrade(nome)}catch(e){GW=0;PGX=null}
     localStorage.setItem('dmc_pano',nome);
     try{
-      if(!GYN)GYN=await (await fetch('setups.json?t='+Date.now())).json();
+      if(!GYN)GYN=await (await fetch('setups_v2.json?t='+Date.now())).json();
       CENA=GYN.setups.find(x=>x.nome===nome)||null;
       roda.classList.remove('aberta');
       calculaVizinhos();
@@ -915,7 +915,7 @@ window._cenaURL=new URLSearchParams(location.search).get('cena');
 if(!window._cenaURL) setTimeout(()=>{try{abreMapa()}catch(e){}},60); else document.body.classList.add('emVarreduras');
 // abre a ultima cena visitada (ou a primeira do projeto) em segundo plano
 (async()=>{try{
-  const g=await (await fetch('setups.json?t='+Date.now())).json();
+  const g=await (await fetch('setups_v2.json?t='+Date.now())).json();
   const ok=(g.setups||[]).filter(x=>x.dados);
   const alvo=window._cenaURL||localStorage.getItem('dmc_pano')||(ok[0]&&ok[0].nome);
   if(!alvo)return;
@@ -1316,7 +1316,7 @@ function iconePino(nome){
 const LEITURA={total:0,prontas:0,lendo:true,conferidas:0};
 async function lerProjeto(){
   try{
-    const g=await (await fetch('setups.json?t='+Date.now())).json();
+    const g=await (await fetch('setups_v2.json?t='+Date.now())).json();
     LEITURA.total=(g.setups||[]).length;          // cenas que existem no indice do projeto
     LEITURA.prontas=0; LEITURA.conferidas=0; LEITURA.lendo=true;
     if(typeof desenhaCards==='function'&&typeof proj!=='undefined')try{desenhaCards()}catch(e){}
@@ -1379,7 +1379,7 @@ async function abreMapa(){
   document.body.classList.add('emProjetos');document.body.classList.remove('emVarreduras');
   ['mMapa','mVarr'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
   document.getElementById('mProjetos').classList.add('ativo');
-  if(!GYN){try{GYN=await (await fetch('setups.json?t='+Date.now())).json()}catch(e){}}
+  if(!GYN){try{GYN=await (await fetch('setups_v2.json?t='+Date.now())).json()}catch(e){}}
   if(!proj&&GYN){
     // projeto montado a partir do indice real: todos os setups processados
     proj={projeto:GYN.projeto,cliente:GYN.cliente,setups:GYN.setups.filter(x=>x.lat).map(x=>({
