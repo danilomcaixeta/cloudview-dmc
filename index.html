@@ -131,6 +131,19 @@ body.latOculta #pinos{right:0}
   background:linear-gradient(90deg,#2b6fd4 0%,#31b5c4 25%,#4fbf6a 50%,#e8c53a 72%,#e8613a 100%)}
 #barraElev b{font-weight:600}
 #barraElev small{color:#666}
+
+/* ---- visualizacao 3D da cena ---- */
+#tela3d{position:fixed;left:0;top:32px;bottom:28px;right:260px;background:#0d0f12;z-index:18;display:none}
+body.latOculta #tela3d{right:0}
+#tela3d.aberta{display:block}
+#cv3d{width:100%;height:100%;display:block;touch-action:none}
+#barra3d{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:6px;z-index:2}
+#barra3d button{width:46px;height:46px;border:0;border-radius:4px;background:#f3f4f5;color:#222;font:600 12px "Segoe UI",sans-serif;cursor:pointer;box-shadow:0 1px 5px #0006}
+#barra3d button.on{background:#4aa8d8;color:#fff}
+#barra3d button:hover{filter:brightness(.95)}
+#info3d{position:absolute;right:12px;top:12px;background:rgba(20,22,26,.82);color:#e8eaed;font:12px "Segoe UI",sans-serif;padding:8px 12px;border-radius:4px;z-index:2;max-width:60%}
+#x3d{position:absolute;right:12px;bottom:14px;z-index:3;border:0;background:#1f7a3a;color:#fff;border-radius:5px;padding:10px 18px;font:600 13px "Segoe UI",sans-serif;cursor:pointer}
+#prog3d{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#fff;font:14px "Segoe UI",sans-serif;background:rgba(0,0,0,.6);padding:12px 20px;border-radius:6px;z-index:3;display:none}
 /* ---- Conteudo do projeto (lista de varreduras, estilo WebShare) ---- */
 #telaConteudo{position:absolute;left:0;top:32px;right:260px;bottom:28px;background:#eceeef;z-index:18;display:none;overflow:auto;padding:22px 28px}
 body.latOculta #telaConteudo{right:0}
@@ -379,6 +392,19 @@ body.emVarreduras #nomeScan{display:inline}
   <button id="bmOk" class="ok">Concluir</button>
   <button id="bmCanc">Cancelar</button>
 </div>
+<div id="tela3d">
+  <canvas id="cv3d"></canvas>
+  <div id="barra3d">
+    <button id="b3Reset" title="Voltar à vista inicial">Início</button>
+    <button id="b3Topo" title="Vista de cima">Topo</button>
+    <button id="b3Cor" title="Alternar cor: cinza / altura">Cor</button>
+    <button id="b3Pt" title="Tamanho dos pontos">Pts</button>
+    <button id="b3Med" title="Medir distância entre 2 pontos">Medir</button>
+  </div>
+  <div id="info3d">Carregando…</div>
+  <div id="prog3d">Montando nuvem 3D…</div>
+  <button id="x3d">Voltar à panorâmica</button>
+</div>
 <div id="pinos"></div>
 <div id="roda"><div id="rodaImg"></div><div id="rodaNome"></div>
   <button class="op" data-op="pano" title="Abrir panorâmica" style="left:50%;top:18%"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg></button>
@@ -394,6 +420,7 @@ body.emVarreduras #nomeScan{display:inline}
   <div class="item" id="mProjetos"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="8" height="16"/><path d="M14 6h7M14 12h7M14 18h7"/></svg>Projetos</div>
   <div class="item" id="mMapa"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg>Mapa de visão geral</div>
   <div class="item ativo" id="mVarr"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>Visualização de Varreduras</div>
+  <div class="item" id="m3D" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg>Visualizar em 3D</div>
   <div class="item" id="mArea" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 20V8l6-4 6 4 4 4v8z"/><path d="M4 20h16"/></svg>Área de medição</div>
   <div class="item" id="mMedir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17l10-10"/></svg>Medir a distância</div>
   <div class="item" id="mExcluir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Excluir</div>
@@ -679,7 +706,7 @@ roda.querySelectorAll('button.op').forEach(btn=>btn.addEventListener('click',asy
   if(!n)return;
   if(op==='pano'){ await carregaPano(n); }
   else if(op==='info'){ infoSetup(n); }
-  else if(op==='nuvem'){ aviso('Nuvem 3D deste setup: em desenvolvimento'); }
+  else if(op==='nuvem'){ abre3D(n); }
   else if(op==='mapa'){
     await abreVisao();
     setTimeout(()=>{ try{ vgDestaca(n); }catch(x){ console.warn(x) } },500);
@@ -735,7 +762,7 @@ function executaOpcao(op,n){
   if(!n)return;
   if(op==='pano'){ fechaConteudo(); document.getElementById('mVarr').click(); window.abrePano(n); }
   else if(op==='info'){ infoSetup(n); }
-  else if(op==='nuvem'){ aviso('Nuvem 3D deste setup: em desenvolvimento'); }
+  else if(op==='nuvem'){ abre3D(n); }
   else if(op==='mapa'){ fechaConteudo(); abreVisao().then(()=>setTimeout(()=>{try{vgDestaca(n)}catch(x){}},500)); }
 }
 document.getElementById('ctLista').addEventListener('click',e=>{
@@ -915,6 +942,131 @@ document.getElementById('bmFecha').onclick=()=>{
   desenha();
 };
 document.getElementById('mArea').onclick=()=>iniciaModo('area');
+document.getElementById('m3D').onclick=()=>abre3D();
+// ao ir para qualquer outra tela, fecha o 3D
+['mProjetos','mMapa','mVarr','mConteudo','mConfig'].forEach(i=>{const e=document.getElementById(i);if(e)e.addEventListener('click',()=>{try{fecha3D()}catch(x){}})});
+
+
+// =====================================================================
+//  VISUALIZACAO 3D DA CENA (nuvem montada da grade XYZ + panorama)
+// =====================================================================
+let T3=null;                         // estado do 3D
+async function carregaThree(){
+  if(window.THREE)return;
+  await new Promise((ok,err)=>{const sc=document.createElement('script');sc.src='https://unpkg.com/three@0.160.0/build/three.min.js';sc.onload=ok;sc.onerror=()=>err(new Error('three.js nao carregou'));document.head.appendChild(sc)});
+}
+function fecha3D(){
+  const t=document.getElementById('tela3d'); t.classList.remove('aberta');
+  if(T3){cancelAnimationFrame(T3.raf);T3.raf=0;}
+}
+async function abre3D(nome){
+  nome=nome||(typeof CENA!=='undefined'&&CENA?CENA.nome:null);
+  if(!nome){aviso('Abra uma varredura primeiro');return}
+  const tela=document.getElementById('tela3d'),prog=document.getElementById('prog3d'),info=document.getElementById('info3d');
+  // fecha as outras telas
+  ['telaMapa','telaVisao','telaConteudo','telaCfg'].forEach(i=>{const e=document.getElementById(i);if(e)e.classList.remove('aberta')});
+  document.body.classList.remove('emProjetos');
+  tela.classList.add('aberta'); prog.style.display='block'; prog.textContent='Carregando dados 3D de '+nome+'…';
+  info.textContent=nome;
+  try{
+    await carregaThree();
+    // garante grade e panorama da cena pedida
+    if(!PGX||!CENA||CENA.nome!==nome){ await carregaGrade(nome); }
+    const imgPano=await new Promise((ok,err)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>ok(im);im.onerror=()=>err(new Error('panorama nao carregou'));im.src=arq('panos/'+nome+'.jpg')});
+    prog.textContent='Montando nuvem 3D…';
+    await new Promise(r=>setTimeout(r,30));
+    constroi3D(nome,imgPano);
+    prog.style.display='none';
+  }catch(e){
+    prog.style.display='block'; prog.textContent='Não foi possível abrir o 3D: '+e.message;
+    setTimeout(()=>{prog.style.display='none'},4000);
+  }
+}
+function constroi3D(nome,imgPano){
+  const THREE=window.THREE, cv=document.getElementById('cv3d'), tela=document.getElementById('tela3d');
+  // amostra a cor do panorama (grade GW x GH casa com a imagem reduzida)
+  const c2=document.createElement('canvas'); c2.width=GW; c2.height=GH;
+  const g2=c2.getContext('2d',{willReadFrequently:true}); g2.drawImage(imgPano,0,0,GW,GH);
+  const cor=g2.getImageData(0,0,GW,GH).data;
+  // filtra pontos validos e limita a distancia (os muito longos poluem)
+  const MAXD=60, n=GW*GH;
+  let cont=0;
+  for(let k=0;k<n;k++){const x=PGX[k],y=PGY[k],z=PGZ[k]; if((Math.abs(x)+Math.abs(y)+Math.abs(z))>0.3 && Math.hypot(x,y,z)<MAXD)cont++}
+  const pos=new Float32Array(cont*3), colG=new Float32Array(cont*3), colH=new Float32Array(cont*3);
+  let zmin=1e9,zmax=-1e9, i=0;
+  for(let k=0;k<n;k++){const x=PGX[k],y=PGY[k],z=PGZ[k]; if((Math.abs(x)+Math.abs(y)+Math.abs(z))<=0.3||Math.hypot(x,y,z)>=MAXD)continue;
+    // scanner: X leste, Y norte, Z altura -> three: x, y(altura), -z(norte)
+    pos[i*3]=x; pos[i*3+1]=z; pos[i*3+2]=-y;
+    const g=cor[k*4]/255; colG[i*3]=colG[i*3+1]=colG[i*3+2]=g;
+    if(z<zmin)zmin=z; if(z>zmax)zmax=z; i++; }
+  // cor por altura (azul->verde->amarelo->vermelho)
+  for(let j=0;j<cont;j++){const t=(pos[j*3+1]-zmin)/Math.max(0.001,(zmax-zmin)); const a=Math.min(0.999,t)*3,q=a|0,f=a-q;
+    const P=[[.17,.43,.83],[.19,.71,.77],[.31,.75,.42],[.91,.77,.23],[.91,.38,.23]];
+    for(let c=0;c<3;c++)colH[j*3+c]=P[q][c]+(P[q+1][c]-P[q][c])*f;}
+  if(T3&&T3.renderer){T3.renderer.dispose()}
+  const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0d0f12);
+  const cam=new THREE.PerspectiveCamera(60,1,0.05,400);
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(colG,3));
+  const mat=new THREE.PointsMaterial({size:0.035,vertexColors:true,sizeAttenuation:true});
+  const pts=new THREE.Points(geo,mat); scene.add(pts);
+  // marcador do scanner
+  const sc=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,12),new THREE.MeshBasicMaterial({color:0xf5a623})); scene.add(sc);
+  // controle orbital proprio (sem dependencia extra)
+  const E={az:0.8,el:0.55,r:9,alvo:new THREE.Vector3(0,0.8,0),modo:'cinza',med:[],medOn:false};
+  T3={renderer,scene,cam,pts,geo,mat,colG,colH,E,nome,cont,zmin,zmax,raf:0,medObjs:[]};
+  function ajusta(){const w=tela.clientWidth,h=tela.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+  function pos3(){const {az,el,r,alvo}=E;cam.position.set(alvo.x+r*Math.cos(el)*Math.sin(az),alvo.y+r*Math.sin(el),alvo.z+r*Math.cos(el)*Math.cos(az));cam.lookAt(alvo)}
+  function laco(){T3.raf=requestAnimationFrame(laco);pos3();renderer.render(scene,cam)}
+  ajusta(); addEventListener('resize',ajusta); laco();
+  // ---- interacao: girar, deslocar, zoom, tocar ----
+  let ptr=new Map(),ult=null,dPin=0,moveu=0;
+  cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);ptr.set(e.pointerId,[e.clientX,e.clientY]);ult=[e.clientX,e.clientY];moveu=0};
+  cv.onpointermove=e=>{
+    if(!ptr.has(e.pointerId))return; const ant=ptr.get(e.pointerId); ptr.set(e.pointerId,[e.clientX,e.clientY]);
+    if(ptr.size===2){const [a,b]=[...ptr.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(dPin)E.r=Math.max(0.5,Math.min(80,E.r*(dPin/d)));dPin=d;return}
+    const dx=e.clientX-ant[0],dy=e.clientY-ant[1]; moveu+=Math.abs(dx)+Math.abs(dy);
+    if(e.buttons===2||e.shiftKey){ // deslocar
+      const k=E.r*0.0016, dir=new THREE.Vector3(); cam.getWorldDirection(dir); const dr=new THREE.Vector3().crossVectors(dir,cam.up).normalize();
+      E.alvo.addScaledVector(dr,-dx*k); E.alvo.y+=dy*k;
+    }else{E.az-=dx*0.006;E.el=Math.max(-1.45,Math.min(1.45,E.el+dy*0.006))}
+  };
+  cv.onpointerup=e=>{ptr.delete(e.pointerId);dPin=0;
+    if(moveu<5&&E.medOn){const p=pegaPonto3D(e.clientX,e.clientY);if(p)adicionaMed(p)}};
+  cv.oncontextmenu=e=>e.preventDefault();
+  cv.onwheel=e=>{e.preventDefault();E.r=Math.max(0.5,Math.min(80,E.r*(e.deltaY>0?1.12:0.89)))};
+  // ---- medicao 3D: acha o ponto da nuvem mais proximo do raio do clique ----
+  function pegaPonto3D(cx,cy){
+    const r=cv.getBoundingClientRect();const nx=((cx-r.left)/r.width)*2-1,ny=-((cy-r.top)/r.height)*2+1;
+    const rc=new THREE.Raycaster();rc.params.Points.threshold=0.08;rc.setFromCamera(new THREE.Vector2(nx,ny),cam);
+    const hit=rc.intersectObject(pts);if(!hit.length)return null;
+    hit.sort((a,b)=>a.distance-b.distance);return hit[0].point.clone();
+  }
+  function adicionaMed(p){
+    E.med.push(p);
+    const m=new THREE.Mesh(new THREE.SphereGeometry(0.07,12,10),new THREE.MeshBasicMaterial({color:0xf5a623}));m.position.copy(p);scene.add(m);T3.medObjs.push(m);
+    if(E.med.length%2===0){
+      const a=E.med[E.med.length-2],b=E.med[E.med.length-1];
+      const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),new THREE.LineBasicMaterial({color:0xffffff}));scene.add(ln);T3.medObjs.push(ln);
+      const d=a.distanceTo(b),dx=Math.abs(b.x-a.x),dy=Math.abs(-b.z-(-a.z)),dz=Math.abs(b.y-a.y);
+      document.getElementById('info3d').innerHTML=`<b>${nome}</b><br>Distância = ${d.toFixed(3).replace('.',',')} m<br>X = ${dx.toFixed(3)} · Y = ${dy.toFixed(3)} · Z = ${dz.toFixed(3)} m`;
+    }
+  }
+  document.getElementById('info3d').innerHTML=`<b>${nome}</b><br>${cont.toLocaleString('pt-BR')} pontos · arraste para girar, botão direito ou Shift para deslocar, roda para zoom`;
+  // ---- botoes ----
+  const b=id=>document.getElementById(id);
+  b('b3Reset').onclick=()=>{E.az=0.8;E.el=0.55;E.r=9;E.alvo.set(0,0.8,0)};
+  b('b3Topo').onclick=()=>{E.el=1.45;E.r=Math.max(E.r,14)};
+  b('b3Cor').onclick=()=>{E.modo=(E.modo==='cinza')?'altura':'cinza';geo.setAttribute('color',new THREE.BufferAttribute(E.modo==='cinza'?colG:colH,3));b('b3Cor').classList.toggle('on',E.modo==='altura')};
+  let tam=0.035;b('b3Pt').onclick=()=>{tam=tam>=0.1?0.02:tam*1.5;mat.size=tam};
+  b('b3Med').onclick=()=>{E.medOn=!E.medOn;E.med=[];b('b3Med').classList.toggle('on',E.medOn);
+    if(!E.medOn){T3.medObjs.forEach(o=>scene.remove(o));T3.medObjs=[]}
+    document.getElementById('info3d').innerHTML=E.medOn?'Medir: clique em 2 pontos da nuvem':`<b>${nome}</b>`};
+  b('x3d').onclick=()=>{fecha3D();document.getElementById('mVarr').click()};
+}
 
 async function carregaPano(nome){
   try{
