@@ -218,6 +218,31 @@ function aplica(){
   for(let i=0;i<N;i++){const v=lut[d[i*4]];o[i*4]=o[i*4+1]=o[i*4+2]=v;o[i*4+3]=255}
   ax.putImageData(out,0,0);desenha();
 }
+// ---------- grade 3D do setup aberto ----------
+let GW=0,GH=0,PGX=null,PGY=null,PGZ=null,PORIG=null;
+async function carregaGrade(nome){
+  const r0=await fetch('dados/'+encodeURIComponent(nome)+'.json');
+  if(!r0.ok) throw new Error('sem grade');
+  const meta=await r0.json();
+  const r1=await fetch('dados/'+encodeURIComponent(nome)+'.bin.gz');
+  if(!r1.ok) throw new Error('sem grade');
+  const buf=await r1.arrayBuffer();
+  const out=await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  const D=new Int16Array(out);
+  GW=meta.w; GH=meta.h;
+  const n=GW*GH;
+  PGX=new Float32Array(n); PGY=new Float32Array(n); PGZ=new Float32Array(n);
+  for(let y=0;y<GH;y++){
+    const base=y*GW*3; let ax=0,ay=0,az=0;
+    for(let x=0;x<GW;x++){
+      const p=base+x*3;
+      ax+=D[p]; ay+=D[p+1]; az+=D[p+2];
+      const k=y*GW+x; PGX[k]=ax/100; PGY[k]=ay/100; PGZ[k]=az/100;
+    }
+  }
+  PORIG=meta.origem;
+}
+
 // troca o panorama exibido (chamado pela vista superior)
 async function carregaPano(nome){
   try{
@@ -229,10 +254,20 @@ async function carregaPano(nome){
     aplica(); desenha();
     const bn=document.getElementById('bNome'); if(bn)bn.textContent=nome;
     const ns=document.getElementById('nomeScan'); if(ns)ns.textContent='· '+nome;
+    try{await carregaGrade(nome)}catch(e){GW=0;PGX=null}
     localStorage.setItem('dmc_pano',nome);
   }catch(e){aviso('Panorama não encontrado: '+nome)}
 }
 window.abrePano=carregaPano;
+// abre a ultima cena visitada (ou a primeira do projeto) no carregamento
+(async()=>{try{
+  const g=await (await fetch('setups.json')).json();
+  const ok=(g.setups||[]).filter(x=>x.dados);
+  if(!ok.length)return;
+  const alvo=localStorage.getItem('dmc_pano')||ok[0].nome;
+  const tem=await fetch('dados/'+encodeURIComponent(alvo)+'.json');
+  if(tem.ok) await carregaPano(alvo);
+}catch(e){}})();
 
 // câmera
 let yaw=0,pitch=0,fov=75*Math.PI/180;
@@ -300,18 +335,29 @@ function telaParaGrade(x,y){
   return [Math.min(W-1,Math.max(0,(u*W)|0)),Math.min(H-1,Math.max(0,(v*H)|0))];
 }
 function ponto3D(x,y){
-  const [i,j]=telaParaGrade(x,y);
-  // procura vizinho válido num raio pequeno
-  for(let r=0;r<=6;r++){
+  if(!PGX) return null;
+  const tf2=Math.tan(fov/2),asp2=cw/ch;
+  const nxx=(2*x/cw-1)*tf2*asp2,nyy=(1-2*y/ch)*tf2;
+  const cy2=Math.cos(yaw),sy2=Math.sin(yaw),cp2=Math.cos(pitch),sp2=Math.sin(pitch);
+  const y1=nyy*cp2-sp2,z1=nyy*sp2+cp2;
+  const x2=nxx*cy2+z1*sy2,z2=-nxx*sy2+z1*cy2;
+  const az=Math.atan2(x2,z2),el=Math.atan2(y1,Math.hypot(x2,z2));
+  const u=az/(2*Math.PI)+0.5,v=0.5-el/Math.PI;
+  const ic=Math.min(GW-1,Math.max(0,(u*GW)|0)),jc=Math.min(GH-1,Math.max(0,(v*GH)|0));
+  const val=(a,b)=>Math.abs(PGX[b*GW+a])+Math.abs(PGY[b*GW+a])+Math.abs(PGZ[b*GW+a])>0;
+  for(let r=0;r<=5;r++){
     for(let dj=-r;dj<=r;dj++)for(let di=-r;di<=r;di++){
-      const a=Math.min(W-1,Math.max(0,i+di)),b=Math.min(H-1,Math.max(0,j+dj)),k=b*W+a;
-      if(gv[k])return {p:[gx[k]/ESC,gy[k]/ESC,gz[k]/ESC],k,i:b,j:a};
+      const a=Math.min(GW-1,Math.max(0,ic+di)),b=Math.min(GH-1,Math.max(0,jc+dj)),k2=b*GW+a;
+      if(val(a,b)){
+        const p=[PGX[k2],PGY[k2],PGZ[k2]];
+        return {p:p,k:k2,i:b,j:a,abs:[PORIG[0]+p[0],PORIG[1]+p[1],PORIG[2]+p[2]]};
+      }
     }
   }
   return null;
 }
 const pose=meta.pose;
-function absoluto(p){const R=pose.R,t=pose.t;return [R[0][0]*p[0]+R[0][1]*p[1]+R[0][2]*p[2]+t[0],R[1][0]*p[0]+R[1][1]*p[1]+R[1][2]*p[2]+t[1],R[2][0]*p[0]+R[2][1]*p[1]+R[2][2]*p[2]+t[2]]}
+function absoluto(p){if(PORIG)return [PORIG[0]+p[0],PORIG[1]+p[1],PORIG[2]+p[2]];const R=pose.R,t=pose.t;return [R[0][0]*p[0]+R[0][1]*p[1]+R[0][2]*p[2]+t[0],R[1][0]*p[0]+R[1][1]*p[1]+R[1][2]*p[2]+t[1],R[2][0]*p[0]+R[2][1]*p[1]+R[2][2]*p[2]+t[2]]}
 const f3=n=>n.toFixed(3).replace('.',','),f2=n=>n.toFixed(3).replace('.',',');
 // medições
 let medir=false,pts=[],meds=[],labels=[],alfinete=null;
