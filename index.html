@@ -114,12 +114,21 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 #visaoLegenda{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.88);font:12px Inter,system-ui,sans-serif;color:#333;padding:6px 12px;display:flex;justify-content:space-between;z-index:1000}
 .bolha{background:rgba(70,45,200,.78);border:2px solid rgba(40,30,160,.9);border-radius:50%;color:#fff;font:700 15px/1 Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px rgba(90,70,220,.25)}
 .pinoRoxo{background:none;border:0}
+
+#pisoBar{flex:0 0 auto;display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#fff;border-bottom:1px solid #e2e5e8;-webkit-overflow-scrolling:touch}
+#pisoBar button{flex:0 0 auto;font:600 12px Inter,system-ui,sans-serif;padding:7px 12px;border-radius:16px;border:1px solid #d3d7db;background:#fff;color:#444;cursor:pointer;white-space:nowrap}
+#pisoBar button.on{background:#1f7a3a;border-color:#1f7a3a;color:#fff}
+#pisoBar span.ct{opacity:.65;font-weight:400}
+
+#visaoDetalhe{display:none;position:absolute;left:12px;right:12px;bottom:44px;background:#fff;border-radius:8px;box-shadow:0 4px 16px #0003;padding:12px 14px;font:13px Inter,system-ui,sans-serif;z-index:1001}
+#visaoDetalhe b{display:block;font-size:14px;margin-bottom:2px}
+#visaoDetalhe button{margin-top:8px;background:#1f7a3a;color:#fff;border:0;border-radius:7px;padding:9px 14px;font:600 13px Inter,sans-serif;cursor:pointer}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-<div id="topo">Projeto: DMC-PARKCENTER <span id="nomeScan">carregando…</span></div>
+<div id="topo">Projeto: GOIÂNIA SHOPPING <span id="nomeScan">carregando…</span></div>
 <canvas id="cv"></canvas>
 <div id="tools">
   <button class="bt" id="bOlho" title="Mostrar / ocultar objetos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -156,11 +165,13 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 <div id="toast"></div>
 <div id="telaVisao">
   <div id="visaoTopo"><b>Mapa de visão geral</b><button id="fechaVisao" title="Fechar">&times;</button></div>
+  <div id="pisoBar"></div>
   <div id="mapaVisao"></div>
+  <div id="visaoDetalhe"></div>
   <div id="visaoLegenda"><span>Setups: <b id="vgN">1</b></span><span id="vgCoord">—</span></div>
 </div>
 <div id="telaMapa">
-  <div id="mapaTopo"><b id="tituloProj">Projeto: DMC-PARKCENTER</b><button id="fechaMapa" title="Fechar">&times;</button></div>
+  <div id="mapaTopo"><b id="tituloProj">Projeto: GOIÂNIA SHOPPING</b><button id="fechaMapa" title="Fechar">&times;</button></div>
   <div id="projScroll">
     <div id="projBusca"><input id="inpBusca" placeholder="Encontrar projeto..."><button id="limpaBusca">&times;</button><button id="btnCamada" title="Alternar mapa/satélite">Satélite</button></div>
     <div id="mapa"></div>
@@ -207,6 +218,22 @@ function aplica(){
   for(let i=0;i<N;i++){const v=lut[d[i*4]];o[i*4]=o[i*4+1]=o[i*4+2]=v;o[i*4+3]=255}
   ax.putImageData(out,0,0);desenha();
 }
+// troca o panorama exibido (chamado pela vista superior)
+async function carregaPano(nome){
+  try{
+    const im=new Image(); im.src='panos/'+nome+'.jpg';
+    await im.decode();
+    ax.clearRect(0,0,W,H); ax.drawImage(im,0,0,W,H);
+    const d=ax.getImageData(0,0,W,H).data;
+    orig.data.set(d);
+    aplica(); desenha();
+    const bn=document.getElementById('bNome'); if(bn)bn.textContent=nome;
+    const ns=document.getElementById('nomeScan'); if(ns)ns.textContent='· '+nome;
+    localStorage.setItem('dmc_pano',nome);
+  }catch(e){aviso('Panorama não encontrado: '+nome)}
+}
+window.abrePano=carregaPano;
+
 // câmera
 let yaw=0,pitch=0,fov=75*Math.PI/180;
 const FOVMIN=8*Math.PI/180,FOVMAX=110*Math.PI/180;
@@ -459,62 +486,78 @@ document.getElementById('vGrade').onclick=()=>{document.getElementById('projCard
 document.getElementById('fechaMapa').onclick=()=>document.getElementById('telaMapa').classList.remove('aberta');
 document.getElementById('mProjetos').onclick=abreMapa;
 
-// ---------- MAPA DE VISAO GERAL (nuvem em vista superior) ----------
-let vg=null,vgPronto=false,vgGrupos=null,vgTopo=null;
-function clusterizar(pts,raio){
-  // agrupamento por distancia em pixels no zoom atual
-  const gs=[];
-  pts.forEach(p=>{
-    const pp=vg.latLngToContainerPoint([p.lat,p.lon]);
-    let g=gs.find(g=>Math.hypot(g.px-pp.x,g.py-pp.y)<raio);
-    if(g){g.itens.push(p);g.px=(g.px*(g.itens.length-1)+pp.x)/g.itens.length;g.py=(g.py*(g.itens.length-1)+pp.y)/g.itens.length}
-    else gs.push({px:pp.x,py:pp.y,itens:[p]});
-  });
-  return gs;
+// ---------- MAPA DE VISAO GERAL ----------
+let vg=null,vgPronto=false,vgGrupos=null,GYN=null,pisoAtivo='Todos';
+function iconeBolha(n){
+  return L.divIcon({className:'',html:'<div class="bolha" style="width:38px;height:38px">'+n+'</div>',iconSize:[38,38],iconAnchor:[19,19]});
+}
+function iconePinoVg(nome){
+  return L.divIcon({className:'pinoRoxo',html:'<div class="pinoWrap"><div class="pinoSombra"></div><div class="pinoGota"></div><div class="pinoGlobo"></div><div class="pinoEtiq">'+nome+'</div></div>',iconSize:[120,92],iconAnchor:[60,57]});
+}
+function listaVisivel(){
+  if(!GYN)return [];
+  return pisoAtivo==='Todos'?GYN.setups:GYN.setups.filter(s=>s.piso===pisoAtivo);
+}
+function montaPisos(){
+  const bar=document.getElementById('pisoBar'); if(!GYN)return;
+  bar.innerHTML='';
+  const mk=(rot,val,ct)=>{
+    const b=document.createElement('button');
+    b.innerHTML=rot+' <span class="ct">'+ct+'</span>';
+    if(val===pisoAtivo)b.classList.add('on');
+    b.onclick=()=>{pisoAtivo=val;montaPisos();redesenhaVG();};
+    bar.appendChild(b);
+  };
+  mk('Todos','Todos',GYN.total);
+  GYN.pisos.forEach(p=>mk(p,p,GYN.contagem[p]));
 }
 function redesenhaVG(){
   if(!vg)return;
   if(vgGrupos)vgGrupos.clearLayers(); else vgGrupos=L.layerGroup().addTo(vg);
-  clusterizar(proj.setups,46).forEach(g=>{
+  const pts=listaVisivel().filter(s=>s.lat).map(s=>({lat:s.lat,lon:s.lon,nome:s.nome,piso:s.piso}));
+  const gs=[];
+  pts.forEach(p=>{
+    const pp=vg.latLngToContainerPoint([p.lat,p.lon]);
+    let g=gs.find(k=>Math.hypot(k.px-pp.x,k.py-pp.y)<46);
+    if(g){g.itens.push(p);g.px=(g.px*(g.itens.length-1)+pp.x)/g.itens.length;g.py=(g.py*(g.itens.length-1)+pp.y)/g.itens.length}
+    else gs.push({px:pp.x,py:pp.y,itens:[p]});
+  });
+  gs.forEach(g=>{
     const ll=vg.containerPointToLatLng([g.px,g.py]);
     if(g.itens.length>1){
-      const ic=L.divIcon({className:'',html:'<div class="bolha" style="width:38px;height:38px">'+g.itens.length+'</div>',iconSize:[38,38],iconAnchor:[19,19]});
-      L.marker(ll,{icon:ic}).on('click',()=>vg.setView(ll,vg.getZoom()+2)).addTo(vgGrupos);
+      L.marker(ll,{icon:iconeBolha(g.itens.length)}).on('click',()=>vg.setView(ll,vg.getZoom()+2)).addTo(vgGrupos);
     }else{
       const st=g.itens[0];
-      const ic=L.divIcon({className:'pinoRoxo',html:'<div class="pinoWrap"><div class="pinoSombra"></div><div class="pinoGota"></div><div class="pinoGlobo"></div><div class="pinoEtiq">'+st.nome+'</div></div>',iconSize:[120,92],iconAnchor:[60,57]});
-      L.marker([st.lat,st.lon],{icon:ic}).on('click',()=>{document.getElementById('telaVisao').classList.remove('aberta')}).addTo(vgGrupos);
+      const mk=L.marker([st.lat,st.lon],{icon:iconePinoVg(st.nome)}).addTo(vgGrupos);
+      mk.on('click',()=>{
+        const d=document.getElementById('visaoDetalhe');
+        d.innerHTML='<b>'+st.nome+'</b><br>'+st.piso+'<br><button id="btnAbrirPano">Abrir panorama</button>';
+        d.style.display='block';
+        setTimeout(()=>{document.getElementById('btnAbrirPano').onclick=()=>{
+          document.getElementById('telaVisao').classList.remove('aberta');
+          window.abrePano(st.nome);
+        }},0);
+      });
     }
   });
+  document.getElementById('vgN').textContent=pts.length;
 }
 async function abreVisao(){
   document.getElementById('telaVisao').classList.add('aberta');
-  if(!proj){try{proj=await (await fetch('projeto.json')).json()}catch(e){}}
-  if(!proj)return;
-  const demo=parseInt(new URLSearchParams(location.search).get('demo')||'0');
-  if(demo>0&&!proj._demo){proj._demo=1;const b0=proj.setups[0];let sd=7;const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280};
-    for(let i=0;i<demo;i++){const ang=rnd()*6.283,r=rnd()*0.0012;proj.setups.push({nome:'DEMO_'+String(i+1).padStart(3,'0'),lat:b0.lat+Math.sin(ang)*r,lon:b0.lon+Math.cos(ang)*r,E:b0.E,N:b0.N,Z:b0.Z,data:b0.data,thumb:b0.thumb})}}
-  document.getElementById('vgN').textContent=proj.setups.length;
-  const st0=proj.setups[0];
-  document.getElementById('vgCoord').textContent='E '+st0.E.toFixed(3).replace('.',',')+' · N '+st0.N.toFixed(3).replace('.',',')+' · UTM 22S';
+  if(!GYN){try{GYN=await (await fetch('setups.json')).json()}catch(e){}}
+  if(!GYN)return;
+  montaPisos();
   if(!vgPronto&&window.L){
-    vg=L.map('mapaVisao',{zoomControl:true,attributionControl:false,zoomSnap:0.5,maxZoom:24}).setView([st0.lat,st0.lon],demo>0?17:20);
-    // vista superior da nuvem: sobreposta como imagem georreferenciada em UTM->lat/lon
-    const tm=await (await fetch('topo_meta.json')).json();
-    const pr=(E,N)=>{ // UTM 22S -> lat/lon por diferenca local (valido para areas pequenas)
-      const dE=E-st0.E, dN=N-st0.N;
-      const dLat=dN/110574.0, dLon=dE/(111320.0*Math.cos(st0.lat*Math.PI/180));
-      return [st0.lat+dLat, st0.lon+dLon];
-    };
-    const sw=pr(tm.x0,tm.y0), ne=pr(tm.x1,tm.y1);
-    vgTopo=L.imageOverlay('topo_L1COLCCI05.png',[sw,ne],{opacity:1}).addTo(vg);
+    const p0=GYN.setups.find(s=>s.lat)||{lat:-16.7078,lon:-49.2733};
+    vg=L.map('mapaVisao',{zoomControl:true,attributionControl:false,zoomSnap:0.5,maxZoom:24}).setView([p0.lat,p0.lon],18);
     vg.on('zoomend moveend',redesenhaVG);
     vgPronto=true;
   }
   setTimeout(()=>{vg.invalidateSize();redesenhaVG()},200);
 }
 document.getElementById('mMapa').onclick=abreVisao;
-document.getElementById('fechaVisao').onclick=()=>document.getElementById('telaVisao').classList.remove('aberta');
+document.getElementById('fechaVisao').onclick=()=>{document.getElementById('visaoDetalhe').style.display='none';document.getElementById('telaVisao').classList.remove('aberta')};
+
 // painel de configurações
 const pc=document.getElementById('painelCfg');
 document.getElementById('cfg').onclick=()=>pc.classList.toggle('aberto');

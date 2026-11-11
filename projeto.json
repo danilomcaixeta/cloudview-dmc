@@ -1,6 +1,6 @@
 {
- "projeto": "DMC-PARKCENTER",
- "cliente": "Iguatemi",
+ "projeto": "GOIÂNIA SHOPPING",
+ "cliente": "ALLOS",
  "lat": -16.707797908940847,
  "lon": -49.27327161893219,
  "setups": [
@@ -12,7 +12,9 @@
    "N": 8151971.63,
    "Z": 795.367882,
    "data": "2026-11-06",
-   "thumb": "thumb_L1COLCCI05.jpg"
+   "thumb": "thumb_L1COLCCI05.jpg",
+   "area": "L1 · Loja Colcci 05"
   }
- ]
+ ],
+ "codigo": "GYN-SHOP"
 }
