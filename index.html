@@ -94,6 +94,11 @@ body.latOculta #pinos{right:0}
 #telaCfg{position:absolute;inset:32px 0 28px 0;background:#eceeef;z-index:19;display:none;overflow:auto;padding:22px 28px}
 #telaCfg.aberta{display:block}
 #cfgBox{background:#fff;border:1px solid #dfe2e5;border-radius:3px;color:#222;padding:18px 22px;max-width:720px}
+#cfgBox{position:relative}
+#cfgX{position:absolute;right:10px;top:8px;width:36px;height:36px;border:0;background:#eef1f3;border-radius:50%;font-size:24px;line-height:1;color:#333;cursor:pointer}
+#cfgX:hover{background:#dfe4e8}
+#cfgVolta{border:0;background:#1f7a3a;color:#fff;border-radius:5px;padding:10px 22px;font:600 14px "Segoe UI",sans-serif;cursor:pointer}
+#cfgVolta:hover{background:#186030}
 #cfgBox h2{font:600 17px "Segoe UI",sans-serif;margin:0 0 16px;color:#222}
 #cfgBox h3{font:600 14px "Segoe UI",sans-serif;margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid #e5e7e9;color:#222}
 #cfgBox .ln{display:flex;align-items:center;gap:14px;padding:7px 0}
@@ -340,6 +345,7 @@ body.emVarreduras #nomeScan{display:inline}
   <div class="sl"><input type="range" id="rgCor" min="0" max="100" value="50"></div>
 </div>
 <div id="telaCfg"><div id="cfgBox">
+  <button id="cfgX" title="Fechar configurações" aria-label="Fechar">&times;</button>
   <h2>Configurações</h2>
   <h3>Gerais</h3>
   <div class="ln"><label>Unidade de comprimento</label><select id="cfUni"><option value="m">Metros (m)</option><option value="cm">Centímetros (cm)</option><option value="mm">Milímetros (mm)</option></select></div>
@@ -358,6 +364,7 @@ body.emVarreduras #nomeScan{display:inline}
   <label class="chk"><input type="checkbox" id="cfElev" checked> Colorir pinos do mapa pela elevação</label>
   <h3>Mapa de visão geral</h3>
   <label class="chk"><input type="checkbox" id="cfOrto" checked> Mostrar imagem de vista superior (mosaico)</label>
+  <div style="margin-top:22px;padding-top:14px;border-top:1px solid #e5e7e9"><button id="cfgVolta">&larr; Voltar</button></div>
 </div></div>
 <div id="barraMed">
   <span id="bmTxt">Medindo: clique nos pontos</span>
@@ -814,7 +821,11 @@ document.addEventListener('pointerdown',e=>{
   }
 },true);
 // ---- tela de configuracoes ----
+let cfgOrigem='mVarr';
 function abreCfg(){
+  // guarda a tela de onde o usuario veio, para voltar a ela
+  const at=['mProjetos','mMapa','mVarr','mConteudo'].find(i=>document.getElementById(i).classList.contains('ativo'));
+  cfgOrigem=at||'mVarr';
   document.body.classList.remove('emProjetos','emVarreduras');
   ['telaMapa','telaVisao','telaConteudo'].forEach(i=>document.getElementById(i).classList.remove('aberta'));
   ['mProjetos','mMapa','mVarr','mConteudo'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
@@ -824,6 +835,14 @@ function abreCfg(){
 }
 function fechaCfg(){document.getElementById('telaCfg').classList.remove('aberta');document.getElementById('mConfig').classList.remove('ativo')}
 document.getElementById('mConfig').onclick=abreCfg;
+function saiCfg(){
+  fechaCfg();
+  const o=document.getElementById(cfgOrigem||'mVarr');
+  if(o)o.click();
+}
+document.getElementById('cfgX').onclick=saiCfg;
+document.getElementById('cfgVolta').onclick=saiCfg;
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('telaCfg').classList.contains('aberta'))saiCfg()});
 ['mProjetos','mMapa','mVarr','mConteudo'].forEach(i=>document.getElementById(i).addEventListener('click',fechaCfg));
 const liga=(id,fn)=>document.getElementById(id).addEventListener('change',fn);
 liga('cfUni',e=>{CFG.uni=e.target.value;salvaCfg();desenha()});
