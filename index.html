@@ -80,6 +80,37 @@ body.latOculta #pinos{right:0}
 #infoSetup td{padding:6px 4px;border-top:1px solid #e5e7e9}#infoSetup td:first-child{color:#666;padding-right:14px}
 #infoSetup button{margin-top:12px;border:0;background:#1f7a3a;color:#fff;border-radius:6px;padding:8px 16px;cursor:pointer;font-weight:600}
 @media (max-width:760px){#pinos{right:150px}#roda{width:220px;height:220px;margin:-110px 0 0 -110px}#roda button.op{width:46px;height:46px;margin:-23px 0 0 -23px}}
+
+/* ---- Conteudo do projeto (lista de varreduras, estilo WebShare) ---- */
+#telaConteudo{position:absolute;left:0;top:32px;right:260px;bottom:28px;background:#eceeef;z-index:18;display:none;overflow:auto;padding:22px 28px}
+body.latOculta #telaConteudo{right:0}
+#telaConteudo.aberta{display:block}
+#ctBox{background:#fff;border:1px solid #dfe2e5;border-radius:3px;box-shadow:0 1px 4px #0002;color:#222;padding:14px 16px 6px}
+#ctBox h2{font:600 17px "Segoe UI",sans-serif;margin:2px 0 12px;color:#222}
+#ctBarra{display:flex;gap:10px;background:#e9ecee;padding:10px;align-items:center;flex-wrap:wrap}
+#ctBarra .grp{display:flex;border:1px solid #cfd3d6;border-radius:3px;background:#fff;overflow:hidden}
+#ctBarra button,#ctBarra select{border:0;background:#fff;padding:9px 13px;font:13px "Segoe UI",sans-serif;color:#222;cursor:pointer}
+#ctBarra .grp button+button{border-left:1px solid #cfd3d6}
+#ctBusca{display:flex;flex:1;min-width:220px;border:1px solid #cfd3d6;border-radius:3px;background:#fff;overflow:hidden}
+#ctCont{padding:9px 11px;background:#e9ecee;color:#555;border-right:1px solid #cfd3d6;font-size:13px;white-space:nowrap}
+#ctBusca input{flex:1;border:0;padding:9px 11px;font:13px "Segoe UI",sans-serif;outline:none;min-width:80px}
+#ctBusca button{border:0;border-left:1px solid #cfd3d6;background:#fff;padding:0 12px;cursor:pointer}
+#ctTab{width:100%;border-collapse:collapse;margin-top:6px}
+#ctTab th{text-align:left;font-weight:600;font-size:13px;padding:10px 6px;border-bottom:2px solid #e1e4e6;color:#222}
+#ctTab td{padding:5px 6px;border-bottom:1px solid #e8eaec;font-size:13px;vertical-align:middle}
+#ctTab tr:hover td{background:#f6f8f9}
+#ctTab td.cn{color:#333}
+#ctTab img{width:64px;height:32px;object-fit:cover;display:block;background:#222}
+#ctTab td.nenhum{font-style:italic;color:#777}
+.exib{position:relative;display:inline-flex;border:1px solid #cfd3d6;border-radius:3px;background:#fff}
+.exib button{border:0;background:#fff;cursor:pointer;padding:6px 11px;display:flex;align-items:center}
+.exib button+button{border-left:1px solid #cfd3d6;padding:6px 8px}
+.exib button:hover{background:#eef4f7}
+.mnuEx{position:fixed;z-index:60;background:#fff;border:1px solid #cfd3d6;border-radius:3px;box-shadow:0 4px 16px #0004;min-width:210px;display:none;padding:4px 0}
+.mnuEx.aberta{display:block}
+.mnuEx div{padding:10px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;font:13px "Segoe UI",sans-serif;color:#222}
+.mnuEx div:hover{background:#eef4f7}
+.mnuEx b{font-size:15px;width:22px}
 /* ---- card do projeto (estilo WebShare) ---- */
 #projCard{background:#fff;border:1px solid #dfe2e5;border-radius:3px;box-shadow:0 1px 4px #0002;margin-bottom:16px}
 #pcTopo{display:flex;justify-content:space-between;align-items:center;background:#ececec;padding:14px 20px;border-bottom:1px solid #dcdfe2}
@@ -210,6 +241,9 @@ body.latOculta #telaVisao{right:0}
 #visaoDetalhe{display:none;position:absolute;left:12px;right:12px;bottom:44px;background:#fff;border-radius:8px;box-shadow:0 4px 16px #0003;padding:12px 14px;font:13px Inter,system-ui,sans-serif;z-index:1001}
 #visaoDetalhe b{display:block;font-size:14px;margin-bottom:2px}
 #visaoDetalhe button{margin-top:8px;background:#1f7a3a;color:#fff;border:0;border-radius:7px;padding:9px 14px;font:600 13px Inter,sans-serif;cursor:pointer}
+
+#nomeScan{display:none}
+body.emVarreduras #nomeScan{display:inline}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -257,7 +291,7 @@ body.latOculta #telaVisao{right:0}
   <div class="item ativo" id="mVarr"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>Visualização de Varreduras</div>
   <div class="item" id="mMedir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17l10-10"/></svg>Medir a distância</div>
   <div class="item" id="mExcluir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Excluir</div>
-  <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Conteúdo do projeto</div>
+  <div class="item" id="mConteudo"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Conteúdo do projeto</div>
   <div class="item" id="mAjuda"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="17.2" r=".6" fill="#222"/></svg>Ajuda</div>
   <div id="verLat">Cloud View DMC · DMC Geoengenharia</div>
 </div>
@@ -269,6 +303,20 @@ body.latOculta #telaVisao{right:0}
 <div id="zoomBox"><button id="zIn" title="Aproximar">+</button><button id="zOut" title="Afastar">&minus;</button></div>
 <div id="bar"><span id="bNome">—</span><span id="bXYZ">XYZ: —</span><span id="bData">—</span><span id="bQual">Qualidade: Alta</span><span id="bPin">Alfinete: —</span><span id="bD">d: —</span></div>
 <div id="toast"></div>
+<div id="telaConteudo"><div id="ctBox">
+  <h2>▾ Varreduras</h2>
+  <div id="ctBarra">
+    <div class="grp"><button id="ctOrd">Classificar por: Nome</button><button id="ctDir" title="Inverter ordem">▲</button></div>
+    <div id="ctBusca"><span id="ctCont">0/0</span><input id="ctQ" type="text" placeholder="Encontrar..." autocomplete="off"><button id="ctLimpa" title="Limpar">✖</button></div>
+  </div>
+  <table id="ctTab"><thead><tr><th style="width:34%">Nome</th><th style="width:16%">Visualização</th><th style="width:24%">Categoria</th><th style="width:14%">Tags</th><th style="width:12%;text-align:right">Exibir</th></tr></thead><tbody id="ctLista"></tbody></table>
+</div></div>
+<div class="mnuEx" id="mnuEx">
+  <div data-o="pano"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>Vista panorâmica</div>
+  <div data-o="nuvem"><b>3D</b>Vista 3D</div>
+  <div data-o="mapa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg>Mapa de visão geral</div>
+  <div data-o="info"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h10"/></svg>Mostrar Propriedades</div>
+</div>
 <div id="telaVisao">
   <div id="visaoTopo"><b>Mapa de visão geral</b><button id="fechaVisao" title="Fechar">&times;</button></div>
   <div id="pisoBar"></div>
@@ -501,6 +549,69 @@ roda.querySelectorAll('button.op').forEach(btn=>btn.addEventListener('click',asy
   }
 }));
 
+
+// =====================================================================
+//  CONTEUDO DO PROJETO: lista de todas as cenas (lida do indice pelo software)
+// =====================================================================
+let ctOrdem='nome', ctAsc=true, ctNome=null;
+function ctSemAcento(t){return (t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function ctRender(){
+  if(!GYN)return;
+  const q=ctSemAcento(document.getElementById('ctQ').value.trim());
+  let L=GYN.setups.slice();
+  const total=L.length;
+  if(q)L=L.filter(x=>ctSemAcento(x.nome).includes(q)||ctSemAcento(x.piso).includes(q));
+  const chaves={nome:x=>x.nome,piso:x=>x.piso||'',cota:x=>x.Z};
+  const k=chaves[ctOrdem]||chaves.nome;
+  L.sort((a,b)=>{const A=k(a),B=k(b);const r=(typeof A==='number')?A-B:String(A).localeCompare(String(B),'pt-BR',{numeric:true});return ctAsc?r:-r});
+  document.getElementById('ctCont').textContent='('+L.length+'/'+total+')';
+  document.getElementById('ctLista').innerHTML=L.map(x=>`<tr>
+    <td class="cn">${x.nome}</td>
+    <td><img loading="lazy" src="${arq('thumbs/'+x.nome+'.jpg')}" alt=""></td>
+    <td class="nenhum">${x.piso?x.piso:'—Nenhum—'}</td><td></td>
+    <td style="text-align:right"><span class="exib" data-n="${x.nome.replace(/"/g,'&quot;')}">
+      <button data-o="pano" title="Vista panorâmica"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg></button>
+      <button data-o="menu" title="Mais opções">▾</button></span></td></tr>`).join('');
+}
+function abreConteudo(){
+  document.body.classList.remove('emProjetos','emVarreduras');
+  document.getElementById('telaMapa').classList.remove('aberta');
+  document.getElementById('telaVisao').classList.remove('aberta');
+  ['mProjetos','mMapa','mVarr'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
+  document.getElementById('mConteudo').classList.add('ativo');
+  document.getElementById('telaConteudo').classList.add('aberta');
+  (async()=>{ if(!GYN){try{GYN=await (await fetch('setups.json?t='+Date.now())).json()}catch(e){}} ctRender(); })();
+}
+function fechaConteudo(){document.getElementById('telaConteudo').classList.remove('aberta');document.getElementById('mConteudo').classList.remove('ativo')}
+document.getElementById('mConteudo').onclick=abreConteudo;
+['mProjetos','mMapa','mVarr'].forEach(i=>document.getElementById(i).addEventListener('click',fechaConteudo));
+document.getElementById('ctQ').addEventListener('input',ctRender);
+document.getElementById('ctLimpa').onclick=()=>{document.getElementById('ctQ').value='';ctRender()};
+document.getElementById('ctDir').onclick=e=>{ctAsc=!ctAsc;e.currentTarget.textContent=ctAsc?'▲':'▼';ctRender()};
+document.getElementById('ctOrd').onclick=e=>{
+  const o=['nome','piso','cota'], t={nome:'Nome',piso:'Piso',cota:'Cota'};
+  ctOrdem=o[(o.indexOf(ctOrdem)+1)%o.length]; e.currentTarget.textContent='Classificar por: '+t[ctOrdem]; ctRender();
+};
+const mnuEx=document.getElementById('mnuEx');
+function executaOpcao(op,n){
+  mnuEx.classList.remove('aberta');
+  if(!n)return;
+  if(op==='pano'){ fechaConteudo(); document.getElementById('mVarr').click(); window.abrePano(n); }
+  else if(op==='info'){ infoSetup(n); }
+  else if(op==='nuvem'){ aviso('Nuvem 3D deste setup: em desenvolvimento'); }
+  else if(op==='mapa'){ fechaConteudo(); abreVisao().then(()=>setTimeout(()=>{try{vgDestaca(n)}catch(x){}},500)); }
+}
+document.getElementById('ctLista').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  const sp=b.closest('.exib'); const n=sp.dataset.n;
+  if(b.dataset.o==='pano'){ executaOpcao('pano',n); return; }
+  ctNome=n; const r=b.getBoundingClientRect();
+  mnuEx.style.left=Math.max(8,r.right-210)+'px'; mnuEx.style.top=(r.bottom+4)+'px';
+  mnuEx.classList.add('aberta'); e.stopPropagation();
+});
+mnuEx.addEventListener('click',e=>{const d=e.target.closest('div[data-o]'); if(d)executaOpcao(d.dataset.o,ctNome)});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#mnuEx')&&!e.target.closest('.exib'))mnuEx.classList.remove('aberta')},true);
+
 async function carregaPano(nome){
   try{
     const im=new Image(); im.crossOrigin='anonymous'; im.src=arq('panos/'+nome+'.jpg');
@@ -525,10 +636,10 @@ async function carregaPano(nome){
     }catch(e){console.warn('vizinhos',e)}
   }catch(e){aviso('Panorama não encontrado: '+nome)}
 }
-window.abrePano=carregaPano;
+window.abrePano=function(n){document.body.classList.add('emVarreduras');return carregaPano(n)};
 window._cenaURL=new URLSearchParams(location.search).get('cena');
 // tela principal e sempre Projetos; a cena carrega em segundo plano
-if(!window._cenaURL) setTimeout(()=>{try{abreMapa()}catch(e){}},60);
+if(!window._cenaURL) setTimeout(()=>{try{abreMapa()}catch(e){}},60); else document.body.classList.add('emVarreduras');
 // abre a ultima cena visitada (ou a primeira do projeto) em segundo plano
 (async()=>{try{
   const g=await (await fetch('setups.json?t='+Date.now())).json();
@@ -838,7 +949,7 @@ function desenhaCards(){
 async function abreMapa(){
   // a tela Projetos convive com o menu lateral (como no WebShare)
   document.getElementById('telaMapa').classList.add('aberta');
-  document.body.classList.add('emProjetos');
+  document.body.classList.add('emProjetos');document.body.classList.remove('emVarreduras');
   ['mMapa','mVarr'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
   document.getElementById('mProjetos').classList.add('ativo');
   if(!GYN){try{GYN=await (await fetch('setups.json?t='+Date.now())).json()}catch(e){}}
@@ -906,16 +1017,24 @@ document.getElementById('fechaAjuda').onclick=()=>document.getElementById('telaA
 document.getElementById('telaAjuda').onclick=(e)=>{if(e.target.id==='telaAjuda')e.currentTarget.classList.remove('aberta')};
 document.getElementById('pcMapa').onclick=()=>{abreOProjeto()};
 document.getElementById('pcVarr').onclick=()=>{
-  document.body.classList.remove('emProjetos');
+  document.body.classList.remove('emProjetos');document.body.classList.add('emVarreduras');
   document.getElementById('telaMapa').classList.remove('aberta');
   document.getElementById('mProjetos').classList.remove('ativo');
   document.getElementById('mVarr').classList.add('ativo');
 };
 
 document.getElementById('mProjetos').onclick=abreMapa;
+// menu lateral: Visualizacao de Varreduras (mostra o nome da cena atual)
+document.getElementById('mVarr').onclick=()=>{
+  document.body.classList.remove('emProjetos');document.body.classList.add('emVarreduras');
+  document.getElementById('telaMapa').classList.remove('aberta');
+  document.getElementById('telaVisao').classList.remove('aberta');
+  ['mProjetos','mMapa'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
+  document.getElementById('mVarr').classList.add('ativo');
+};
 // "Abrir projeto": sai dos Projetos e entra no mapa de visao geral do projeto
 function abreOProjeto(){
-  document.body.classList.remove('emProjetos');
+  document.body.classList.remove('emProjetos','emVarreduras');
   document.getElementById('telaMapa').classList.remove('aberta');
   document.getElementById('mProjetos').classList.remove('ativo');
   document.getElementById('mVarr').classList.remove('ativo');
@@ -1001,6 +1120,7 @@ function redesenhaVG(){
   if(vg._fitar){const ll=pts.map(p=>[p.lat,p.lon]);try{vg.fitBounds(L.latLngBounds(ll).pad(0.25),{maxZoom:19,animate:true})}catch(e){}}
 }
 async function abreVisao(){
+  document.body.classList.remove('emVarreduras');
   // o menu lateral faz parte da tela: garante que esta aberto
   document.body.classList.remove('latOculta');
   document.getElementById('lat').classList.remove('oculto');
