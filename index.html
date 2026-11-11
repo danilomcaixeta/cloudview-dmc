@@ -60,16 +60,9 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 #zoomBox{position:absolute;right:16px;bottom:96px;z-index:14;display:flex;flex-direction:column;gap:6px}
 #zoomBox button{width:38px;height:38px;border:0;border-radius:8px;background:rgba(246,247,248,.95);color:#222;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 2px 8px #0005}
 
-#telaMapa{position:fixed;inset:0;background:#0f1114;z-index:60;display:none}
-#telaMapa.aberta{display:block}
-#mapa{position:absolute;left:0;right:0;top:0;bottom:96px}
 #mapaTopo{position:absolute;left:0;right:0;top:0;height:46px;background:#fff;border-bottom:1px solid #d6d9dc;display:flex;align-items:center;justify-content:space-between;padding:0 12px;z-index:1000}
 #mapaTopo b{font-family:Inter,system-ui,sans-serif;font-size:13px;color:#222}
 #fechaMapa{border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:#444;padding:4px 8px}
-#mapaCard{position:absolute;left:12px;right:12px;bottom:12px;background:#fff;border-radius:10px;box-shadow:0 4px 16px #0003;padding:12px 14px;z-index:1000;font-family:Inter,system-ui,sans-serif}
-#mapaCard .coord{font-size:13px;color:#222;line-height:1.55}
-#mapaCard .coord b{color:#111}
-#mapaCard a{display:inline-block;margin-top:8px;background:#1f7a3a;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:8px 14px;border-radius:7px}
 .leaflet-popup-content{font-family:Inter,system-ui,sans-serif;font-size:12.5px;line-height:1.5;margin:10px 12px}
 
 .pinoDmc{background:none;border:0}
@@ -82,6 +75,35 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 
 #mapaAcoes{display:flex;align-items:center;gap:4px}
 #btnCamada{font:600 11.5px/1 Inter,system-ui,sans-serif;color:#1f7a3a;background:#eef7f0;border:1px solid #c3e0cb;border-radius:7px;padding:6px 10px;cursor:pointer}
+
+#telaMapa{position:fixed;inset:0;background:#f4f5f6;z-index:60;display:none;flex-direction:column}
+#telaMapa.aberta{display:flex}
+#mapaTopo{position:relative;flex:0 0 auto}
+#projScroll{flex:1;overflow-y:auto;padding:12px 12px 24px}
+#projBusca{display:flex;gap:0;align-items:stretch;margin-bottom:10px}
+#inpBusca{flex:1;min-width:0;border:1px solid #cfd3d7;border-right:0;border-radius:6px 0 0 6px;padding:10px 12px;font:14px Inter,system-ui,sans-serif;background:#fff;outline:0}
+#limpaBusca{border:1px solid #cfd3d7;background:#f3f4f5;width:40px;font-size:18px;cursor:pointer;color:#333;border-radius:0 6px 6px 0}
+#btnCamada{margin-left:8px;border:0;background:#3fa9d6;color:#fff;font:600 12.5px Inter,system-ui,sans-serif;border-radius:6px;padding:0 14px;cursor:pointer}
+#mapa{position:relative;width:100%;height:46vh;min-height:260px;border-radius:4px;overflow:hidden;background:#cfe3ee}
+#projBarra{display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px}
+#projBarra button{font:13px Inter,system-ui,sans-serif;border:1px solid #cfd3d7;background:#fff;border-radius:5px;padding:8px 12px;color:#444;cursor:pointer}
+#projBarra div{display:flex}
+#projBarra div button{width:40px;padding:8px 0;border-radius:0}
+#projBarra div button:first-child{border-radius:5px 0 0 5px}
+#projBarra div button:last-child{border-radius:0 5px 5px 0;border-left:0}
+#projBarra div button.on{background:#3fa9d6;color:#fff;border-color:#3fa9d6}
+#projCards{display:grid;gap:14px}
+#projCards.grade{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+#projCards.lista{grid-template-columns:1fr}
+.pCard{background:#fff;border:1px solid #dcdfe2;border-radius:6px;overflow:hidden;cursor:pointer;box-shadow:0 1px 3px #0001}
+.pCard:active{background:#f3f9fc}
+.pCard img{width:100%;height:150px;object-fit:cover;display:block;background:#111}
+#projCards.lista .pCard{display:flex}
+#projCards.lista .pCard img{width:150px;height:96px;flex:0 0 auto}
+.pInfo{padding:10px 12px;font-family:Inter,system-ui,sans-serif}
+.pInfo b{display:block;font-size:14px;color:#222;margin-bottom:3px}
+.pInfo span{display:block;font-size:12px;color:#666;line-height:1.5}
+.pInfo .tag{display:inline-block;margin-top:5px;background:#e8f4fa;color:#1f78a0;border-radius:4px;padding:2px 7px;font-size:11px}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -123,11 +145,12 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 <div id="bar"><span id="bNome">—</span><span id="bXYZ">XYZ: —</span><span id="bData">—</span><span id="bQual">Qualidade: Alta</span><span id="bPin">Alfinete: —</span><span id="bD">d: —</span></div>
 <div id="toast"></div>
 <div id="telaMapa">
-  <div id="mapa"></div>
-  <div id="mapaTopo"><b>Projeto</b><div id="mapaAcoes"><button id="btnCamada">Satélite</button><button id="fechaMapa">&times;</button></div></div>
-  <div id="mapaCard">
-    <div class="coord" id="mapaCoord">Carregando…</div>
-    <a id="linkGm" href="#" target="_blank" rel="noopener">Abrir no Google Maps</a>
+  <div id="mapaTopo"><b id="tituloProj">Projeto: DMC-PARKCENTER</b><button id="fechaMapa" title="Fechar">&times;</button></div>
+  <div id="projScroll">
+    <div id="projBusca"><input id="inpBusca" placeholder="Encontrar projeto..."><button id="limpaBusca">&times;</button><button id="btnCamada" title="Alternar mapa/satélite">Satélite</button></div>
+    <div id="mapa"></div>
+    <div id="projBarra"><button id="ordem">Classificar por: Nome do Projeto &#9662;</button><div><button id="vLista" title="Lista">&#9776;</button><button id="vGrade" class="on" title="Grade">&#9638;</button></div></div>
+    <div id="projCards" class="grade"></div>
   </div>
 </div>
 <script>
@@ -369,35 +392,58 @@ document.getElementById('abrirLat').onclick=()=>{
 };
 document.getElementById('bAplicar').onclick=()=>{salva();document.getElementById('painelCfg').classList.remove('aberto');aviso('Ajuste aplicado e salvo')};
 
-// ---------- MAPA ----------
-let mapa=null,mapaPronto=false,geo=null,camadaOsm=null,camadaSat=null,emSatelite=true;
+// ---------- PROJETOS ----------
+let mapa=null,mapaPronto=false,proj=null,camadaOsm=null,camadaSat=null,emSatelite=false,marcadores=[];
+function iconePino(nome){
+  return L.divIcon({className:'pinoDmc',html:'<div class="pinoWrap"><div class="pinoSombra"></div><div class="pinoGota"></div><div class="pinoGlobo"></div><div class="pinoEtiq">'+nome+'</div></div>',iconSize:[120,92],iconAnchor:[60,57],popupAnchor:[0,-52]});
+}
+function desenhaCards(){
+  const q=(document.getElementById('inpBusca').value||'').toLowerCase();
+  const box=document.getElementById('projCards');
+  const ok=proj.projeto.toLowerCase().includes(q)||proj.setups.some(x=>x.nome.toLowerCase().includes(q));
+  box.innerHTML='';
+  if(!ok){box.innerHTML='<div style="color:#777;font:13px Inter,sans-serif;padding:10px">Nenhum projeto encontrado</div>';return}
+  const c=document.createElement('div');c.className='pCard';
+  c.innerHTML=`<img src="${proj.setups[0].thumb}" alt=""><div class="pInfo"><b>${proj.projeto}</b><span>${proj.cliente||''}</span><span>${proj.setups.length} varredura(s) · gravação ${proj.setups[0].data}</span><span class="tag">UTM 22S</span></div>`;
+  c.onclick=()=>{document.getElementById('telaMapa').classList.remove('aberta');document.getElementById('mVarr').click&&document.getElementById('mVarr').click()};
+  box.appendChild(c);
+}
 async function abreMapa(){
   document.getElementById('telaMapa').classList.add('aberta');
-  if(!geo){try{geo=await (await fetch('mapa.json')).json()}catch(e){}}
-  if(!geo){document.getElementById('mapaCoord').textContent='Coordenada não disponível';return}
+  if(!proj){try{proj=await (await fetch('projeto.json')).json()}catch(e){}}
+  if(!proj){return}
+  document.getElementById('tituloProj').textContent='Projeto: '+proj.projeto;
   if(!mapaPronto&&window.L){
-    mapa=L.map('mapa',{zoomControl:true,attributionControl:false}).setView([geo.lat,geo.lon],18);
+    mapa=L.map('mapa',{zoomControl:true,attributionControl:false}).setView([-15.5,-52],4);
     camadaOsm=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'}).addTo(mapa);
-    camadaSat=L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'}).addTo(mapa);
-    const icon=L.divIcon({className:'pinoDmc',html:'<div class="pinoWrap"><div class="pinoSombra"></div><div class="pinoGota"></div><div class="pinoGlobo"></div><div class="pinoEtiq">'+meta.nome+'</div></div>',iconSize:[120,92],iconAnchor:[60,57],popupAnchor:[0,-52]});
-    L.marker([geo.lat,geo.lon],{icon}).addTo(mapa).bindPopup(`<b>${meta.nome}</b><br>E ${f2(geo.E)} · N ${f2(geo.N)}<br>Cota ${f2(geo.Z)} m`).openPopup();
+    camadaSat=L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'});
+    // 1 pino por setup (o projeto aparece no mapa geral pelo 1o setup)
+    proj.setups.forEach(st=>{
+      const mk=L.marker([st.lat,st.lon],{icon:iconePino(st.nome)}).addTo(mapa)
+        .bindPopup(`<b>${st.nome}</b><br>E ${st.E.toFixed(3).replace('.',',')} · N ${st.N.toFixed(3).replace('.',',')}<br>Cota ${st.Z.toFixed(3).replace('.',',')} m<br><a href="https://www.google.com/maps/search/?api=1&query=${st.lat},${st.lon}" target="_blank" rel="noopener" style="color:#1f7a3a;font-weight:600">Abrir no Google Maps</a>`);
+      marcadores.push(mk);
+    });
     mapaPronto=true;
+    const pts=proj.setups.map(x=>[x.lat,x.lon]);
+    setTimeout(()=>{mapa.invalidateSize();mapa.flyToBounds(L.latLngBounds(pts).pad(0.4),{maxZoom:17,duration:1.6})},500);
   }
-  const c=(v)=>v.toFixed(3).replace('.',',');
-  document.getElementById('mapaCoord').innerHTML=`<b>${(meta&&meta.nome)||'Scan'}</b><br>UTM ${geo.fuso} · E ${c(geo.E)} · N ${c(geo.N)}<br>Cota ${c(geo.Z)} m · Lat ${geo.lat.toFixed(6)} · Lon ${geo.lon.toFixed(6)}`;
-  document.getElementById('linkGm').href=`https://www.google.com/maps/search/?api=1&query=${geo.lat},${geo.lon}`;
+  desenhaCards();
   setTimeout(()=>{if(mapa)mapa.invalidateSize()},150);
 }
 document.getElementById('btnCamada').onclick=()=>{
   if(!mapa)return;
   const b=document.getElementById('btnCamada');
   emSatelite=!emSatelite;
-  if(emSatelite){mapa.removeLayer(camadaOsm);camadaSat.addTo(mapa);b.textContent='Satélite';}
-  else{mapa.removeLayer(camadaSat);camadaOsm.addTo(mapa);b.textContent='Mapa';}
+  if(emSatelite){mapa.removeLayer(camadaOsm);camadaSat.addTo(mapa);b.textContent='Mapa';}
+  else{mapa.removeLayer(camadaSat);camadaOsm.addTo(mapa);b.textContent='Satélite';}
 };
-document.getElementById('mMapa').onclick=abreMapa;
+document.getElementById('inpBusca').oninput=()=>{if(proj)desenhaCards()};
+document.getElementById('limpaBusca').onclick=()=>{document.getElementById('inpBusca').value='';if(proj)desenhaCards()};
+document.getElementById('vLista').onclick=()=>{document.getElementById('projCards').className='lista';document.getElementById('vLista').classList.add('on');document.getElementById('vGrade').classList.remove('on')};
+document.getElementById('vGrade').onclick=()=>{document.getElementById('projCards').className='grade';document.getElementById('vGrade').classList.add('on');document.getElementById('vLista').classList.remove('on')};
 document.getElementById('fechaMapa').onclick=()=>document.getElementById('telaMapa').classList.remove('aberta');
-document.getElementById('mProjetos').onclick=()=>{document.getElementById('telaMapa').classList.remove('aberta')};
+document.getElementById('mProjetos').onclick=abreMapa;
+document.getElementById('mMapa').style.display='none';
 // painel de configurações
 const pc=document.getElementById('painelCfg');
 document.getElementById('cfg').onclick=()=>pc.classList.toggle('aberto');
