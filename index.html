@@ -445,8 +445,8 @@ body.emVarreduras #nomeScan{display:inline}
 </div>
 <script>
 // tampa preta do nadir: esconde o tripu e a distorcao do piso
-// NADIR = fracao da altura da imagem coberta (0.26 = ~47 graus em torno do nadir)
-const NADIR=parseFloat(new URLSearchParams(location.search).get('nadir'))||0.26;
+// NADIR = fracao da altura da imagem coberta (0.13 = ~23 graus em torno do nadir)
+const NADIR=parseFloat(new URLSearchParams(location.search).get('nadir'))||0.13;
 // ---- base dos arquivos pesados: Cloudflare R2 (o GitHub guarda so o software) ----
 const R2BASE='https://pub-4124c0d235a343278f1e6c5bbdb2c539.r2.dev/dcm/gyn-shop/';
 const R2V='2';  // sobe quando precisar furar cache antigo dos arquivos
