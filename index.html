@@ -634,12 +634,14 @@ async function lerProjeto(){
       const passo=()=>{
         while(ativos<12&&fila.length){
           const x=fila.shift(); ativos++;
-          fetch(arq('dados/'+x.nome+'.json'),{method:'HEAD'})
+          const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(),8000);
+          fetch(arq('dados/'+x.nome+'.json'),{method:'HEAD',signal:ctl.signal})
             .then(r=>{if(r.ok)LEITURA.prontas++})
             .catch(()=>{})
             .finally(()=>{
+              clearTimeout(tm);
               ativos--; LEITURA.conferidas++;
-              if(LEITURA.conferidas%40===0||!fila.length){try{desenhaCards()}catch(e){}}
+              if(LEITURA.conferidas%25===0||!fila.length){try{desenhaCards()}catch(e){}}
               if(!fila.length&&ativos===0)fim(); else passo();
             });
         }
@@ -665,7 +667,7 @@ function desenhaCards(){
   const br=d=>d.split('-').reverse().join('/');
   document.getElementById('pcNome').textContent=proj.projeto;
   document.getElementById('pcN').textContent=LEITURA.lendo
-    ? tot+' varreduras (verificando…)'
+    ? tot+' varreduras (verificando '+LEITURA.conferidas+'/'+tot+')'
     : String(tot)+(feitas<tot?' ('+feitas+' disponíveis para visualização)':'');
   document.getElementById('pcPer').textContent=br(dt);
   const mod=(GYN&&GYN.atualizado)?GYN.atualizado:new Date().toLocaleString('pt-BR');
@@ -674,7 +676,7 @@ function desenhaCards(){
   loc.textContent=cLat.toFixed(6)+', '+cLon.toFixed(6);
   loc.onclick=(e)=>{e.preventDefault();if(mapa)mapa.flyTo([cLat,cLon],18,{duration:1})};
   document.getElementById('pcCli').textContent=proj.cliente||'—';
-  document.getElementById('pcProg').textContent=LEITURA.lendo?'verificando…':Math.round(100*feitas/Math.max(tot,1))+'% disponível';
+  document.getElementById('pcProg').textContent=LEITURA.lendo?('verificando '+LEITURA.conferidas+'/'+LEITURA.total):Math.round(100*feitas/Math.max(tot,1))+'% disponível';
   const im=document.getElementById('pcThumb');
   const alvo=arq(proj.setups[0].thumb);
   if(im.getAttribute('src')!==alvo)im.src=alvo;
