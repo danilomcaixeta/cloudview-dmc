@@ -505,12 +505,13 @@ function montaPisos(){
     const b=document.createElement('button');
     b.innerHTML=rot+' <span class="ct">'+ct+'</span>';
     if(val===pisoAtivo)b.classList.add('on');
-    b.onclick=()=>{pisoAtivo=val;montaPisos();redesenhaVG();};
+    b.onclick=()=>{pisoAtivo=val;montaPisos();redesenhaVG();enquadra();};
     bar.appendChild(b);
   };
   mk('Todos','Todos',GYN.total);
   GYN.pisos.forEach(p=>mk(p,p,GYN.contagem[p]));
 }
+function enquadra(){if(vg)vg._fitar=true;redesenhaVG();setTimeout(()=>{if(vg)vg._fitar=false},1200)}
 function redesenhaVG(){
   if(!vg)return;
   if(vgGrupos)vgGrupos.clearLayers(); else vgGrupos=L.layerGroup().addTo(vg);
@@ -541,6 +542,7 @@ function redesenhaVG(){
     }
   });
   document.getElementById('vgN').textContent=pts.length;
+  if(vg._fitar){const ll=pts.map(p=>[p.lat,p.lon]);try{vg.fitBounds(L.latLngBounds(ll).pad(0.25),{maxZoom:19,animate:true})}catch(e){}}
 }
 async function abreVisao(){
   document.getElementById('telaVisao').classList.add('aberta');
