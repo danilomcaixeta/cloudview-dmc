@@ -40,6 +40,55 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 #dica{position:absolute;left:70px;top:44px;background:#0009;padding:6px 10px;border-radius:4px;font-size:12px;z-index:10;max-width:420px}
 #toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:#1b1f23;padding:8px 14px;border-radius:6px;z-index:40;display:none}
 
+
+/* ---- cabecalho com ajuda e 3 barras ---- */
+#topo{justify-content:space-between;padding:0 0 0 14px}
+#topoBtns{display:flex;height:100%}
+#topoBtns button{width:56px;height:100%;border:0;border-left:1px solid #2a2a2a;background:#000;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#topoBtns button:hover{background:#1c1c1c}
+#btnMenu{background:#1d8fb3!important}
+#btnMenu:hover{background:#2aa3c8!important}
+#verLat{padding:14px 16px;font-size:11px;color:#8a9096}
+/* ---- card do projeto (estilo WebShare) ---- */
+#projCard{background:#fff;border:1px solid #dfe2e5;border-radius:3px;box-shadow:0 1px 4px #0002;margin-bottom:16px}
+#pcTopo{display:flex;justify-content:space-between;align-items:center;background:#ececec;padding:14px 20px;border-bottom:1px solid #dcdfe2}
+#pcNome{font:500 17px Inter,"Segoe UI",system-ui,sans-serif;color:#2b2f33;letter-spacing:.2px}
+.pcBtns{display:flex}
+.pcBtns button{width:50px;height:36px;border:1px solid #cfd3d7;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pcBtns button:first-child{border-radius:4px 0 0 4px}.pcBtns button:last-child{border-radius:0 4px 4px 0;border-left:0}
+.pcBtns button:hover{background:#eef6fa}
+#pcCorpo{display:flex;gap:26px;padding:20px;align-items:flex-start}
+#pcImg{flex:0 0 42%;max-width:430px;background:#111;border-radius:2px;overflow:hidden;aspect-ratio:2/1;display:flex}
+#pcImg img{width:100%;height:100%;object-fit:cover;display:block}
+#pcInfo{flex:1;border-collapse:collapse;font:14px Inter,"Segoe UI",system-ui,sans-serif;color:#2b2f33}
+#pcInfo td{padding:11px 10px;border-top:1px solid #e7e9eb;vertical-align:middle}
+#pcInfo tr:first-child td{border-top:0}
+#pcInfo td.ic{width:34px;text-align:center}
+#pcInfo td.lb{width:34%;font-weight:500}
+#pcInfo tr:nth-child(odd){background:#fafafa}
+#pcInfo a{color:#2a7fb0;text-decoration:none}
+#pcAcoes{display:flex;align-items:center;gap:16px;padding:0 20px 20px}
+#pcAcoes .btnAbrir{margin:0;padding:10px 22px}
+#pcProg{font:13px Inter,system-ui,sans-serif;color:#667}
+#mapaWrap{background:#fff;border:1px solid #dfe2e5;border-radius:3px;box-shadow:0 1px 4px #0002;padding:14px}
+#mapaWrap #projBusca{margin-bottom:10px}
+#mapaWrap #mapa{height:52vh;min-height:300px;border-radius:2px}
+/* ---- ajuda ---- */
+#telaAjuda{position:fixed;inset:0;background:#000a;z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
+#telaAjuda.aberta{display:flex}
+.ajBox{position:relative;background:#fff;color:#222;border-radius:8px;max-width:560px;width:100%;padding:26px 28px;box-shadow:0 10px 40px #0008;font-family:Inter,system-ui,sans-serif}
+.ajBox h2{font-size:20px;margin-bottom:10px}.ajBox p{font-size:14px;line-height:1.6;color:#444}
+#fechaAjuda{position:absolute;right:10px;top:6px;border:0;background:transparent;font-size:28px;cursor:pointer;color:#666}
+@media (max-width:760px){
+  #telaMapa{right:150px}
+  #projScroll{padding:12px}
+  #pcCorpo{flex-direction:column;gap:14px;padding:14px}
+  #pcImg{flex:none;width:100%;max-width:none}
+  #pcInfo{font-size:12.5px}#pcInfo td{padding:9px 6px}#pcInfo td.lb{width:40%}
+  #pcTopo{padding:12px 14px}#pcNome{font-size:15px}
+  #topoBtns button{width:46px}
+}
+
 @media (max-width:760px){
   #lat{width:150px}
   #cv{right:150px;width:calc(100% - 150px)}
@@ -79,10 +128,11 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 #mapaAcoes{display:flex;align-items:center;gap:4px}
 #btnCamada{font:600 11.5px/1 Inter,system-ui,sans-serif;color:#1f7a3a;background:#eef7f0;border:1px solid #c3e0cb;border-radius:7px;padding:6px 10px;cursor:pointer}
 
-#telaMapa{position:fixed;inset:0;background:#f4f5f6;z-index:60;display:none;flex-direction:column}
+#telaMapa{position:fixed;left:0;top:32px;bottom:0;right:260px;background:#eceef0;z-index:14;display:none;flex-direction:column}
+body.latOculta #telaMapa{right:0}
 #telaMapa.aberta{display:flex}
 #mapaTopo{position:relative;flex:0 0 auto}
-#projScroll{flex:1;overflow-y:auto;padding:12px 12px 24px}
+#projScroll{flex:1;overflow-y:auto;padding:18px 20px 28px;color:#222}
 #projBusca{display:flex;gap:0;align-items:stretch;margin-bottom:10px}
 #inpBusca{flex:1;min-width:0;border:1px solid #cfd3d7;border-right:0;border-radius:6px 0 0 6px;padding:10px 12px;font:14px Inter,system-ui,sans-serif;background:#fff;outline:0}
 #limpaBusca{border:1px solid #cfd3d7;background:#f3f4f5;width:40px;font-size:18px;cursor:pointer;color:#333;border-radius:0 6px 6px 0}
@@ -134,7 +184,11 @@ body.latOculta #telaVisao{right:0}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-<div id="topo">Projeto: GOIÂNIA SHOPPING <span id="nomeScan">carregando…</span></div>
+<div id="topo"><div id="topoTxt">Projeto: GOIÂNIA SHOPPING <span id="nomeScan">carregando…</span></div>
+  <div id="topoBtns">
+    <button id="btnAjuda" title="Ajuda" aria-label="Ajuda"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg></button>
+    <button id="btnMenu" title="Mostrar ou ocultar o menu" aria-label="Menu"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg></button>
+  </div></div>
 <canvas id="cv"></canvas>
 <div id="tools">
   <button class="bt" id="bOlho" title="Mostrar / ocultar objetos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -164,7 +218,13 @@ body.latOculta #telaVisao{right:0}
   <div class="item" id="mMedir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17l10-10"/></svg>Medir a distância</div>
   <div class="item" id="mExcluir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Excluir</div>
   <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Conteúdo do projeto</div>
+  <div class="item" id="mAjuda"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="17.2" r=".6" fill="#222"/></svg>Ajuda</div>
+  <div id="verLat">Cloud View DMC · DMC Geoengenharia</div>
 </div>
+<div id="telaAjuda"><div class="ajBox"><button id="fechaAjuda" title="Fechar">&times;</button>
+  <h2>Ajuda</h2>
+  <p>Em breve aqui vai o tutorial de como usar o Cloud View DMC: navegar entre varreduras, medir distâncias, usar o mapa de visão geral e ajustar a imagem.</p>
+</div></div>
 <button id="abrirLat" title="Mostrar painel">&laquo;</button>
 <div id="zoomBox"><button id="zIn" title="Aproximar">+</button><button id="zOut" title="Afastar">&minus;</button></div>
 <div id="bar"><span id="bNome">—</span><span id="bXYZ">XYZ: —</span><span id="bData">—</span><span id="bQual">Qualidade: Alta</span><span id="bPin">Alfinete: —</span><span id="bD">d: —</span></div>
@@ -177,12 +237,27 @@ body.latOculta #telaVisao{right:0}
   <div id="visaoLegenda"><span>Setups: <b id="vgN">1</b></span><span id="vgCoord">—</span></div>
 </div>
 <div id="telaMapa">
-  <div id="mapaTopo"><b id="tituloProj">Projetos</b><button id="abreProjeto">Abrir projeto</button></div>
   <div id="projScroll">
-    <div id="projBusca"><input id="inpBusca" placeholder="Encontrar projeto..."><button id="limpaBusca">&times;</button><button id="btnCamada" title="Alternar mapa/satélite">Satélite</button></div>
-    <div id="mapa"></div>
-    <div id="projBarra"><button id="ordem">Classificar por: Nome do Projeto &#9662;</button><div><button id="vLista" title="Lista">&#9776;</button><button id="vGrade" class="on" title="Grade">&#9638;</button></div></div>
-    <div id="projCards" class="grade"></div>
+    <div id="projCard">
+      <div id="pcTopo"><span id="pcNome">Projeto</span>
+        <div class="pcBtns"><button id="pcMapa" title="Mapa de visão geral"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#222" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg></button><button id="pcVarr" title="Visualização de varreduras"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg></button></div></div>
+      <div id="pcCorpo">
+        <div id="pcImg"><img id="pcThumb" crossorigin="anonymous" alt=""></div>
+        <table id="pcInfo">
+          <tr><td class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="#222"><path d="M4 3h9v18H4zM15 6h5v14h-5z"/></svg></td><td class="lb">Número de varreduras</td><td id="pcN">—</td></tr>
+          <tr><td class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="5" width="18" height="16"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></td><td class="lb">Período de gravação</td><td id="pcPer">—</td></tr>
+          <tr><td class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#222" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 8v5l3 2M5 3L2 6M19 3l3 3"/></svg></td><td class="lb">Tempo de modificação</td><td id="pcMod">—</td></tr>
+          <tr><td class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="#222"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg></td><td class="lb">Local</td><td><a id="pcLoc" href="#">—</a></td></tr>
+          <tr><td class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#222" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></td><td class="lb">Cliente</td><td id="pcCli">—</td></tr>
+          <tr><td class="ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#222" stroke-width="2"><path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"/></svg></td><td class="lb">Sistema de coordenadas</td><td>SIRGAS 2000 · UTM 22S</td></tr>
+        </table>
+      </div>
+      <div id="pcAcoes"><button id="abreProjeto" class="btnAbrir">Abrir projeto</button><span id="pcProg"></span></div>
+    </div>
+    <div id="mapaWrap">
+      <div id="projBusca"><input id="inpBusca" placeholder="Encontrar projeto..."><button id="limpaBusca">&times;</button><button id="btnCamada" title="Alternar mapa/satélite">Satélite</button></div>
+      <div id="mapa"></div>
+    </div>
   </div>
 </div>
 <script>
@@ -522,19 +597,35 @@ function iconePino(nome){
 }
 function desenhaCards(){
   const q=(document.getElementById('inpBusca').value||'').toLowerCase();
-  const box=document.getElementById('projCards');
+  const card=document.getElementById('projCard');
   const ok=proj.projeto.toLowerCase().includes(q)||proj.setups.some(x=>x.nome.toLowerCase().includes(q));
-  box.innerHTML='';
-  if(!ok){box.innerHTML='<div style="color:#777;font:13px Inter,sans-serif;padding:10px">Nenhum projeto encontrado</div>';return}
-  const c=document.createElement('div');c.className='pCard';
+  card.style.display=ok?'':'none';
+  if(!ok)return;
   const tot=(GYN&&GYN.total_projeto)||proj.setups.length;
   const feitas=(GYN&&(GYN.processadas||GYN.setups.length))||proj.setups.length;
-  c.innerHTML=`<img crossorigin="anonymous" src="${arq(proj.setups[0].thumb)}" alt=""><div class="pInfo"><b>${proj.projeto}</b><span>${proj.cliente||''}</span><span>${feitas} de ${tot} varreduras processadas</span><span class="tag">UTM 22S</span><button class="btnAbrir">Abrir projeto</button></div>`;
-  c.onclick=abreOProjeto;
-  box.appendChild(c);
+  const la=proj.setups.map(x=>x.lat),lo=proj.setups.map(x=>x.lon);
+  const cLat=(Math.min(...la)+Math.max(...la))/2, cLon=(Math.min(...lo)+Math.max(...lo))/2;
+  const dt=(proj.setups.map(x=>x.data).filter(Boolean).sort()[0])||'2026-11-06';
+  const br=d=>d.split('-').reverse().join('/');
+  document.getElementById('pcNome').textContent=proj.projeto;
+  document.getElementById('pcN').textContent=tot+' varreduras ('+feitas+' processadas)';
+  document.getElementById('pcPer').textContent=br(dt);
+  const mod=(GYN&&GYN.atualizado)?GYN.atualizado:new Date().toLocaleString('pt-BR');
+  document.getElementById('pcMod').textContent=mod;
+  const loc=document.getElementById('pcLoc');
+  loc.textContent=cLat.toFixed(6)+', '+cLon.toFixed(6);
+  loc.onclick=(e)=>{e.preventDefault();if(mapa)mapa.flyTo([cLat,cLon],18,{duration:1})};
+  document.getElementById('pcCli').textContent=proj.cliente||'—';
+  document.getElementById('pcProg').textContent=Math.round(100*feitas/tot)+'% processado';
+  const im=document.getElementById('pcThumb');
+  const alvo=arq(proj.setups[0].thumb);
+  if(im.getAttribute('src')!==alvo)im.src=alvo;
 }
 async function abreMapa(){
+  // a tela Projetos convive com o menu lateral (como no WebShare)
   document.getElementById('telaMapa').classList.add('aberta');
+  ['mMapa','mVarr'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
+  document.getElementById('mProjetos').classList.add('ativo');
   if(!GYN){try{GYN=await (await fetch('setups.json?t='+Date.now())).json()}catch(e){}}
   if(!proj&&GYN){
     // projeto montado a partir do indice real: todos os setups processados
@@ -542,7 +633,7 @@ async function abreMapa(){
       nome:x.nome,lat:x.lat,lon:x.lon,E:x.E,N:x.N,Z:x.Z,thumb:x.thumb,data:'2026-11-06'}))};
   }
   if(!proj){return}
-  document.getElementById('tituloProj').textContent='Projetos';
+  
   if(!mapaPronto&&window.L){
     mapa=L.map('mapa',{zoomControl:true,attributionControl:false}).setView([-15.5,-52],4);
     camadaOsm=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'}).addTo(mapa);
@@ -571,13 +662,44 @@ document.getElementById('btnCamada').onclick=()=>{
 };
 document.getElementById('inpBusca').oninput=()=>{if(proj)desenhaCards()};
 document.getElementById('limpaBusca').onclick=()=>{document.getElementById('inpBusca').value='';if(proj)desenhaCards()};
-document.getElementById('vLista').onclick=()=>{document.getElementById('projCards').className='lista';document.getElementById('vLista').classList.add('on');document.getElementById('vGrade').classList.remove('on')};
-document.getElementById('vGrade').onclick=()=>{document.getElementById('projCards').className='grade';document.getElementById('vGrade').classList.add('on');document.getElementById('vLista').classList.remove('on')};
 document.getElementById('abreProjeto').onclick=abreOProjeto;
+// ---- cabecalho: ajuda e menu (3 barras) ----
+function alternaMenu(){
+  const oculto=document.getElementById('lat').classList.contains('oculto');
+  if(oculto){
+    document.body.classList.remove('latOculta');
+    document.getElementById('lat').classList.remove('oculto');
+    document.getElementById('cv').classList.remove('cheio');
+    document.getElementById('bar').classList.remove('cheio');
+    document.getElementById('abrirLat').classList.remove('mostra');
+  }else{
+    document.body.classList.add('latOculta');
+    document.getElementById('lat').classList.add('oculto');
+    document.getElementById('cv').classList.add('cheio');
+    document.getElementById('bar').classList.add('cheio');
+    document.getElementById('abrirLat').classList.remove('mostra');
+  }
+  try{ajusta()}catch(e){}
+  setTimeout(()=>{try{if(mapa)mapa.invalidateSize();if(vg)vg.invalidateSize()}catch(e){}},80);
+}
+document.getElementById('btnMenu').onclick=alternaMenu;
+function abreAjuda(){document.getElementById('telaAjuda').classList.add('aberta')}
+document.getElementById('btnAjuda').onclick=abreAjuda;
+document.getElementById('mAjuda').onclick=abreAjuda;
+document.getElementById('fechaAjuda').onclick=()=>document.getElementById('telaAjuda').classList.remove('aberta');
+document.getElementById('telaAjuda').onclick=(e)=>{if(e.target.id==='telaAjuda')e.currentTarget.classList.remove('aberta')};
+document.getElementById('pcMapa').onclick=()=>{abreOProjeto()};
+document.getElementById('pcVarr').onclick=()=>{
+  document.getElementById('telaMapa').classList.remove('aberta');
+  document.getElementById('mProjetos').classList.remove('ativo');
+  document.getElementById('mVarr').classList.add('ativo');
+};
+
 document.getElementById('mProjetos').onclick=abreMapa;
 // "Abrir projeto": sai dos Projetos e entra no mapa de visao geral do projeto
 function abreOProjeto(){
   document.getElementById('telaMapa').classList.remove('aberta');
+  document.getElementById('mProjetos').classList.remove('ativo');
   document.getElementById('mVarr').classList.remove('ativo');
   abreVisao();
 }
