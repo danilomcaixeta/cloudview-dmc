@@ -24,6 +24,7 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 #tools{position:absolute;left:0;top:32px;bottom:28px;width:58px;display:flex;flex-direction:column;gap:6px;padding:10px 6px;z-index:12}
 .bt{width:46px;height:46px;border-radius:4px;background:rgba(246,247,248,.95);border:0;color:#222;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .bt.on{background:var(--sel);color:#fff}.bt svg{width:24px;height:24px}
+body.emProjetos #cfg{display:none!important}
 #cfg{position:absolute;left:0;bottom:28px;width:44px;height:44px;border-radius:0 22px 0 0;background:rgba(40,46,52,.85);border:0;color:#fff;z-index:30;cursor:pointer}
 #painelCfg{position:absolute;left:0;bottom:72px;width:300px;background:rgba(246,247,248,.97);color:#222;border-radius:0 8px 8px 0;padding:14px 16px;z-index:30;display:none;box-shadow:0 4px 18px #0007}
 #painelCfg.aberto{display:block}
@@ -108,7 +109,7 @@ html,body{height:100%;background:#000;font:13px/1.3 "Segoe UI",system-ui,sans-se
 #bar.cheio{right:0!important}
 #abrirLat{position:absolute;right:12px;top:42px;z-index:22;display:none;width:40px;height:40px;border:0;border-radius:8px;background:rgba(246,247,248,.95);color:#222;font-size:18px;cursor:pointer;box-shadow:0 2px 8px #0005}
 #abrirLat.mostra{display:block}
-#fecharLat{width:30px;height:30px;border:0;background:transparent;font-size:18px;cursor:pointer;color:#555}
+#fecharLat{display:none!important;width:30px;height:30px;border:0;background:transparent;font-size:18px;cursor:pointer;color:#555}
 #zoomBox{position:absolute;right:16px;bottom:96px;z-index:14;display:flex;flex-direction:column;gap:6px}
 #zoomBox button{width:38px;height:38px;border:0;border-radius:8px;background:rgba(246,247,248,.95);color:#222;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 2px 8px #0005}
 
@@ -624,6 +625,7 @@ function desenhaCards(){
 async function abreMapa(){
   // a tela Projetos convive com o menu lateral (como no WebShare)
   document.getElementById('telaMapa').classList.add('aberta');
+  document.body.classList.add('emProjetos');
   ['mMapa','mVarr'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
   document.getElementById('mProjetos').classList.add('ativo');
   if(!GYN){try{GYN=await (await fetch('setups.json?t='+Date.now())).json()}catch(e){}}
@@ -690,6 +692,7 @@ document.getElementById('fechaAjuda').onclick=()=>document.getElementById('telaA
 document.getElementById('telaAjuda').onclick=(e)=>{if(e.target.id==='telaAjuda')e.currentTarget.classList.remove('aberta')};
 document.getElementById('pcMapa').onclick=()=>{abreOProjeto()};
 document.getElementById('pcVarr').onclick=()=>{
+  document.body.classList.remove('emProjetos');
   document.getElementById('telaMapa').classList.remove('aberta');
   document.getElementById('mProjetos').classList.remove('ativo');
   document.getElementById('mVarr').classList.add('ativo');
@@ -698,6 +701,7 @@ document.getElementById('pcVarr').onclick=()=>{
 document.getElementById('mProjetos').onclick=abreMapa;
 // "Abrir projeto": sai dos Projetos e entra no mapa de visao geral do projeto
 function abreOProjeto(){
+  document.body.classList.remove('emProjetos');
   document.getElementById('telaMapa').classList.remove('aberta');
   document.getElementById('mProjetos').classList.remove('ativo');
   document.getElementById('mVarr').classList.remove('ativo');
