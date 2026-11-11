@@ -81,6 +81,36 @@ body.latOculta #pinos{right:0}
 #infoSetup button{margin-top:12px;border:0;background:#1f7a3a;color:#fff;border-radius:6px;padding:8px 16px;cursor:pointer;font-weight:600}
 @media (max-width:760px){#pinos{right:150px}#roda{width:220px;height:220px;margin:-110px 0 0 -110px}#roda button.op{width:46px;height:46px;margin:-23px 0 0 -23px}}
 
+
+/* ---- menus da barra de acao, configuracoes gerais ---- */
+.mnu{position:fixed;z-index:70;background:#fff;border:1px solid #cfd3d6;border-radius:4px;box-shadow:0 5px 20px #0005;min-width:230px;padding:6px 0;display:none;font:13px "Segoe UI",system-ui,sans-serif;color:#222}
+.mnu.aberta{display:block}
+.mnu h5{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#888;padding:6px 14px 4px;margin:0}
+.mnu label{display:flex;align-items:center;gap:9px;padding:9px 14px;cursor:pointer}
+.mnu label:hover{background:#eef4f7}
+.mnu label input{width:15px;height:15px;accent-color:#2a9fd0}
+.mnu .sl{padding:6px 14px 12px}
+.mnu .sl input[type=range]{width:100%}
+#telaCfg{position:absolute;inset:32px 0 28px 0;background:#eceeef;z-index:19;display:none;overflow:auto;padding:22px 28px}
+#telaCfg.aberta{display:block}
+#cfgBox{background:#fff;border:1px solid #dfe2e5;border-radius:3px;color:#222;padding:18px 22px;max-width:720px}
+#cfgBox h2{font:600 17px "Segoe UI",sans-serif;margin:0 0 16px;color:#222}
+#cfgBox h3{font:600 14px "Segoe UI",sans-serif;margin:22px 0 10px;padding-bottom:6px;border-bottom:1px solid #e5e7e9;color:#222}
+#cfgBox .ln{display:flex;align-items:center;gap:14px;padding:7px 0}
+#cfgBox .ln>label{flex:0 0 220px;color:#333}
+#cfgBox select,#cfgBox input[type=text]{padding:7px 9px;border:1px solid #cfd3d6;border-radius:3px;font:13px "Segoe UI",sans-serif;background:#fff;color:#222;min-width:180px}
+#cfgBox input[type=range]{flex:1;accent-color:#2a9fd0}
+#cfgBox .chk{display:flex;align-items:center;gap:9px;padding:7px 0;cursor:pointer}
+#cfgBox .chk input{width:15px;height:15px;accent-color:#2a9fd0}
+
+#barraMed{position:absolute;left:50%;transform:translateX(-50%);bottom:56px;z-index:40;display:none;align-items:center;gap:8px;
+  background:#fff;border:1px solid #cfd3d6;border-radius:6px;box-shadow:0 4px 18px #0004;padding:9px 12px;font:13px "Segoe UI",sans-serif;color:#222;max-width:94vw;flex-wrap:wrap}
+#barraMed.aberta{display:flex}
+#barraMed span{color:#555;padding-right:6px}
+#barraMed button{border:1px solid #cfd3d6;background:#fff;border-radius:4px;padding:7px 12px;cursor:pointer;font:13px "Segoe UI",sans-serif;color:#222}
+#barraMed button:hover{background:#eef4f7}
+#barraMed button.ok{background:#1f7a3a;border-color:#1f7a3a;color:#fff;font-weight:600}
+#barraMed button.ok:hover{background:#186030}
 /* ---- Conteudo do projeto (lista de varreduras, estilo WebShare) ---- */
 #telaConteudo{position:absolute;left:0;top:32px;right:260px;bottom:28px;background:#eceeef;z-index:18;display:none;overflow:auto;padding:22px 28px}
 body.latOculta #telaConteudo{right:0}
@@ -285,6 +315,48 @@ body.emVarreduras #nomeScan{display:inline}
   <div class="row"><button id="bAuto">Clarear automático</button></div>
   <div id="estado" style="font-size:11px;opacity:.7;margin-top:8px"></div>
 </div>
+<div class="mnu" id="mnuOlho">
+  <h5>Mostrar na varredura</h5>
+  <label><input type="checkbox" id="ckPinos" checked> Varreduras próximas (pinos)</label>
+  <label><input type="checkbox" id="ckMeds" checked> Medições</label>
+  <label><input type="checkbox" id="ckNotas" checked> Anotações</label>
+  <label><input type="checkbox" id="ckRot" checked> Rótulos e nomes</label>
+  <label><input type="checkbox" id="ckBus" checked> Bússola</label>
+</div>
+<div class="mnu" id="mnuCor">
+  <h5>Modo de cor</h5>
+  <label><input type="radio" name="mc" value="intensidade" checked> Intensidade (original)</label>
+  <label><input type="radio" name="mc" value="claro"> Pontos claros (clarear)</label>
+  <label><input type="radio" name="mc" value="contraste"> Alto contraste</label>
+  <div class="sl"><input type="range" id="rgCor" min="0" max="100" value="50"></div>
+</div>
+<div id="telaCfg"><div id="cfgBox">
+  <h2>Configurações</h2>
+  <h3>Gerais</h3>
+  <div class="ln"><label>Unidade de comprimento</label><select id="cfUni"><option value="m">Metros (m)</option><option value="cm">Centímetros (cm)</option><option value="mm">Milímetros (mm)</option></select></div>
+  <div class="ln"><label>Unidade de área</label><select id="cfArea"><option value="m2">Metros quadrados (m²)</option><option value="cm2">Centímetros quadrados (cm²)</option></select></div>
+  <div class="ln"><label>Unidade de ângulo</label><select id="cfAng"><option value="grau">Graus (°)</option><option value="rad">Radianos</option></select></div>
+  <h3>Visualização de Varredura</h3>
+  <div class="ln"><label>Resolução da panorâmica</label><select id="cfRes"><option value="0.5">Baixa (economiza dados)</option><option value="0.75">Média</option><option value="1" selected>Alta (nativa)</option></select></div>
+  <div class="ln"><label>Velocidade do movimento</label><input type="range" id="cfVel" min="30" max="250" value="100"><b id="cfVelV">1,0x</b></div>
+  <div class="ln"><label>Limitar visibilidade a</label><select id="cfDist"><option value="0">Sem limite</option><option value="10">10 m</option><option value="20">20 m</option><option value="40">40 m</option><option value="60">60 m</option></select></div>
+  <h3>Visibilidade</h3>
+  <label class="chk"><input type="checkbox" id="cfPinos" checked> Pinos das varreduras próximas</label>
+  <label class="chk"><input type="checkbox" id="cfMed" checked> Medições</label>
+  <label class="chk"><input type="checkbox" id="cfNota" checked> Anotações</label>
+  <label class="chk"><input type="checkbox" id="cfBus" checked> Bússola</label>
+  <label class="chk"><input type="checkbox" id="cfNome" checked> Nome da varredura no cabeçalho</label>
+  <label class="chk"><input type="checkbox" id="cfElev" checked> Colorir pinos do mapa pela elevação</label>
+  <h3>Mapa de visão geral</h3>
+  <label class="chk"><input type="checkbox" id="cfOrto" checked> Mostrar imagem de vista superior (mosaico)</label>
+</div></div>
+<div id="barraMed">
+  <span id="bmTxt">Medindo: clique nos pontos</span>
+  <button id="bmFecha" title="Conectar o último ponto ao primeiro (perímetro)">⟲ Conectar extremidades</button>
+  <button id="bmDesfaz" title="Remover o último ponto">↶ Desfazer</button>
+  <button id="bmOk" class="ok">Concluir</button>
+  <button id="bmCanc">Cancelar</button>
+</div>
 <div id="pinos"></div>
 <div id="roda"><div id="rodaImg"></div><div id="rodaNome"></div>
   <button class="op" data-op="pano" title="Abrir panorâmica" style="left:50%;top:18%"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg></button>
@@ -300,9 +372,11 @@ body.emVarreduras #nomeScan{display:inline}
   <div class="item" id="mProjetos"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="8" height="16"/><path d="M14 6h7M14 12h7M14 18h7"/></svg>Projetos</div>
   <div class="item" id="mMapa"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg>Mapa de visão geral</div>
   <div class="item ativo" id="mVarr"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>Visualização de Varreduras</div>
+  <div class="item" id="mArea" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 20V8l6-4 6 4 4 4v8z"/><path d="M4 20h16"/></svg>Área de medição</div>
   <div class="item" id="mMedir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17l10-10"/></svg>Medir a distância</div>
   <div class="item" id="mExcluir" style="padding-left:50px"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Excluir</div>
   <div class="item" id="mConteudo"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Conteúdo do projeto</div>
+  <div class="item" id="mConfig"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Configurações</div>
   <div class="item" id="mAjuda"><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1-1.4 2"/><circle cx="12" cy="17.2" r=".6" fill="#222"/></svg>Ajuda</div>
   <div id="verLat">Cloud View DMC · DMC Geoengenharia</div>
 </div>
@@ -623,6 +697,161 @@ document.getElementById('ctLista').addEventListener('click',e=>{
 mnuEx.addEventListener('click',e=>{const d=e.target.closest('div[data-o]'); if(d)executaOpcao(d.dataset.o,ctNome)});
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#mnuEx')&&!e.target.closest('.exib'))mnuEx.classList.remove('aberta')},true);
 
+
+// =====================================================================
+//  CONFIGURACOES GERAIS (persistidas no navegador) e barra de acao
+// =====================================================================
+const CFG=Object.assign({uni:'m',area:'m2',ang:'grau',res:1,vel:1,dist:0,pinos:true,med:true,nota:true,bus:true,nome:true,elev:true,orto:true,cor:'intensidade',corN:50},
+  JSON.parse(localStorage.getItem('dmc_cfg')||'{}'));
+function salvaCfg(){localStorage.setItem('dmc_cfg',JSON.stringify(CFG))}
+function aplicaCfg(){
+  // visibilidade
+  document.getElementById('ckPinos').checked=CFG.pinos;
+  document.getElementById('ckMeds').checked=CFG.med;
+  document.getElementById('ckNotas').checked=CFG.nota;
+  document.getElementById('ckRot').checked=CFG.nome;
+  document.getElementById('ckBus').checked=CFG.bus;
+  document.getElementById('cfPinos').checked=CFG.pinos;
+  document.getElementById('cfMed').checked=CFG.med;
+  document.getElementById('cfNota').checked=CFG.nota;
+  document.getElementById('cfBus').checked=CFG.bus;
+  document.getElementById('cfNome').checked=CFG.nome;
+  document.getElementById('cfElev').checked=CFG.elev;
+  document.getElementById('cfOrto').checked=CFG.orto;
+  document.getElementById('cfUni').value=CFG.uni;
+  document.getElementById('cfArea').value=CFG.area;
+  document.getElementById('cfAng').value=CFG.ang;
+  document.getElementById('cfRes').value=String(CFG.res);
+  document.getElementById('cfVel').value=Math.round(CFG.vel*100);
+  document.getElementById('cfVelV').textContent=CFG.vel.toFixed(1).replace('.',',')+'x';
+  document.getElementById('cfDist').value=String(CFG.dist);
+  document.getElementById('rgCor').value=CFG.corN;
+  document.querySelectorAll('#mnuCor input[name=mc]').forEach(r=>r.checked=(r.value===CFG.cor));
+  document.getElementById('bOlho').classList.toggle('on',CFG.pinos||CFG.med||CFG.nota);
+  document.getElementById('bussola').style.display=CFG.bus?'block':'none';
+  document.getElementById('nomeScan').style.display=CFG.nome?'':'none';
+  desenhaPinos();
+}
+// unidade de comprimento: metros -> texto
+function uComp(v){ // v em metros
+  if(CFG.uni==='cm')return f2(v*100)+' cm';
+  if(CFG.uni==='mm')return f2(v*1000)+' mm';
+  return f3(v)+' m';
+}
+function uArea(v){ // v em m2
+  if(CFG.area==='cm2')return f2(v*10000)+' cm²';
+  return f2(v)+' m²';
+}
+function uAng(rad){
+  const g=(rad*180/Math.PI+360)%360;
+  return CFG.ang==='rad'?f3(rad)+' rad':f2(g)+'°';
+}
+// ---- menu do olho ----
+document.getElementById('bOlho').onclick=e=>{
+  e.stopPropagation();
+  const m=document.getElementById('mnuOlho'),r=e.currentTarget.getBoundingClientRect();
+  m.style.left=(r.right+8)+'px';m.style.top=Math.min(r.top,innerHeight-300)+'px';
+  document.getElementById('mnuCor').classList.remove('aberta');
+  m.classList.toggle('aberta');
+};
+// ---- menu de cor ----
+document.getElementById('bCor').onclick=e=>{
+  e.stopPropagation();
+  const m=document.getElementById('mnuCor'),r=e.currentTarget.getBoundingClientRect();
+  m.style.left=(r.right+8)+'px';m.style.top=Math.min(r.top,innerHeight-260)+'px';
+  document.getElementById('mnuOlho').classList.remove('aberta');
+  m.classList.toggle('aberta');
+};
+document.querySelectorAll('#mnuOlho input').forEach(ck=>ck.onchange=()=>{
+  CFG.pinos=document.getElementById('ckPinos').checked;
+  CFG.med=document.getElementById('ckMeds').checked;
+  CFG.nota=document.getElementById('ckNotas').checked;
+  CFG.nome=document.getElementById('ckRot').checked;
+  CFG.bus=document.getElementById('ckBus').checked;
+  salvaCfg();aplicaCfg();desenha();
+});
+document.querySelectorAll('#mnuCor input[name=mc]').forEach(r=>r.onchange=()=>{
+  CFG.cor=r.value;salvaCfg();desenha();
+});
+document.getElementById('rgCor').oninput=e=>{CFG.corN=+e.target.value;salvaCfg();desenha()};
+document.addEventListener('pointerdown',e=>{
+  if(!e.target.closest('.mnu')&&!e.target.closest('#bOlho')&&!e.target.closest('#bCor')){
+    document.getElementById('mnuOlho').classList.remove('aberta');
+    document.getElementById('mnuCor').classList.remove('aberta');
+  }
+},true);
+// ---- tela de configuracoes ----
+function abreCfg(){
+  document.body.classList.remove('emProjetos','emVarreduras');
+  ['telaMapa','telaVisao','telaConteudo'].forEach(i=>document.getElementById(i).classList.remove('aberta'));
+  ['mProjetos','mMapa','mVarr','mConteudo'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
+  document.getElementById('mConfig').classList.add('ativo');
+  document.getElementById('telaCfg').classList.add('aberta');
+  aplicaCfg();
+}
+function fechaCfg(){document.getElementById('telaCfg').classList.remove('aberta');document.getElementById('mConfig').classList.remove('ativo')}
+document.getElementById('mConfig').onclick=abreCfg;
+['mProjetos','mMapa','mVarr','mConteudo'].forEach(i=>document.getElementById(i).addEventListener('click',fechaCfg));
+const liga=(id,fn)=>document.getElementById(id).addEventListener('change',fn);
+liga('cfUni',e=>{CFG.uni=e.target.value;salvaCfg();desenha()});
+liga('cfArea',e=>{CFG.area=e.target.value;salvaCfg();desenha()});
+liga('cfAng',e=>{CFG.ang=e.target.value;salvaCfg()});
+liga('cfRes',e=>{CFG.res=+e.target.value;salvaCfg();aviso('Resolução aplicada ao reabrir a varredura');});
+document.getElementById('cfVel').oninput=e=>{CFG.vel=+e.target.value/100;document.getElementById('cfVelV').textContent=CFG.vel.toFixed(1).replace('.',',')+'x';salvaCfg()};
+liga('cfDist',e=>{CFG.dist=+e.target.value;salvaCfg();desenhaPinos()});
+['Pinos:pinos','Med:med','Nota:nota','Bus:bus','Nome:nome','Elev:elev','Orto:orto'].forEach(x=>{
+  const [n,k]=x.split(':');
+  liga('cf'+n,e=>{CFG[k]=e.target.checked;salvaCfg();aplicaCfg();if(k==='elev'||k==='orto')redesenhaVG();desenha()});
+});
+// ---- atalhos de teclado (manual FARO) ----
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+  const inc=0.06*CFG.vel, k=e.key.toLowerCase();
+  let usou=true;
+  if(k==='a')yaw-=inc; else if(k==='d')yaw+=inc;
+  else if(k==='w')pitch=Math.min(1.5,pitch+inc); else if(k==='s')pitch=Math.max(-1.5,pitch-inc);
+  else if(k==='i'||k==='k'||k==='j'||k==='l'){ // olhar
+    if(k==='i')pitch=Math.min(1.5,pitch+inc); if(k==='k')pitch=Math.max(-1.5,pitch-inc);
+    if(k==='j')yaw-=inc; if(k==='l')yaw+=inc;
+  } else if(k==='+')fov=Math.max(FOVMIN,fov*0.9);
+  else if(k==='-')fov=Math.min(FOVMAX,fov*1.1);
+  else usou=false;
+  if(usou){e.preventDefault();desenha()}
+});
+// ---- copiar coordenadas ----
+function copia(txt){
+  try{navigator.clipboard.writeText(txt);aviso('Copiado: '+txt)}
+  catch(e){const t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();aviso('Copiado: '+txt)}
+}
+
+
+// barra de medicao
+document.getElementById('bmOk').onclick=()=>{
+  if(modo==='area'){
+    if(pts.length<3){aviso('A área precisa de 3 pontos ou mais');return}
+    const P=pts.map(p=>p.p);
+    if(segmentosCruzam(P)){aviso('Área inválida: os segmentos se cruzam');return}
+    meds.push({tipo:'area',pontos:pts.slice(),fechado:true,nome:'Área '+(meds.filter(m=>m.tipo==='area').length+1)});
+    pts=[];modo=null;fechaBarraMed();
+    document.getElementById('mArea').classList.remove('ativo');
+    desenha();return;
+  }
+  concluiMed();
+};
+document.getElementById('bmCanc').onclick=()=>{
+  cancelaMed();
+  ['mMedir','mArea','mExcluir'].forEach(i=>document.getElementById(i).classList.remove('ativo'));
+};
+document.getElementById('bmDesfaz').onclick=()=>{pts.pop();if(pts.length)abreBarraMed((modo==='area'?'Área':'Distância')+': '+pts.length+' ponto(s)');else cancelaMed();desenha()};
+document.getElementById('bmFecha').onclick=()=>{
+  if(pts.length<3){aviso('Precisa de 3 pontos ou mais');return}
+  meds.push({tipo:'dist',pontos:pts.slice(),fechado:true,nome:'Perímetro '+(meds.length+1)});
+  pts=[];modo=null;fechaBarraMed();
+  document.getElementById('mMedir').classList.remove('ativo');
+  desenha();
+};
+document.getElementById('mArea').onclick=()=>iniciaModo('area');
+
 async function carregaPano(nome){
   try{
     const im=new Image(); im.crossOrigin='anonymous'; im.src=arq('panos/'+nome+'.jpg');
@@ -691,7 +920,14 @@ function desenha(){
       const x0=fx|0,y0=fy|0,tx=fx-x0,ty=fy-y0;
       const s00=(y0*W+x0)*4,s10=s00+4,s01=s00+W*4,s11=s01+4,p=(y*cw+x)*4;
       const w00=(1-tx)*(1-ty),w10=tx*(1-ty),w01=(1-tx)*ty,w11=tx*ty;
-      const val=sd[s00]*w00+sd[s10]*w10+sd[s01]*w01+sd[s11]*w11;
+      let val=sd[s00]*w00+sd[s10]*w10+sd[s01]*w01+sd[s11]*w11;
+      if(CFG.cor!=='intensidade'){
+        const nn=CFG.corN/50;                       // 0..2
+        let t=val/255;
+        if(CFG.cor==='claro')t=Math.pow(t,1/(0.75+0.5*nn));
+        else t=Math.min(1,Math.max(0,(t-0.5)*(0.6+0.9*nn)+0.5));
+        val=t*255;
+      }
       px[p]=px[p+1]=px[p+2]=val;px[p+3]=255;
     }
   }
@@ -755,7 +991,61 @@ const pose=meta.pose;
 function absoluto(p){if(PORIG)return [PORIG[0]+p[0],PORIG[1]+p[1],PORIG[2]+p[2]];const R=pose.R,t=pose.t;return [R[0][0]*p[0]+R[0][1]*p[1]+R[0][2]*p[2]+t[0],R[1][0]*p[0]+R[1][1]*p[1]+R[1][2]*p[2]+t[1],R[2][0]*p[0]+R[2][1]*p[1]+R[2][2]*p[2]+t[2]]}
 const f3=n=>n.toFixed(3).replace('.',','),f2=n=>n.toFixed(3).replace('.',',');
 // medições
-let medir=false,pts=[],meds=[],labels=[],alfinete=null;
+let modo=null;            // null | 'dist' | 'area' | 'excluir'
+let pts=[];               // pontos da medicao em andamento: {i,j,p,cena}
+let meds=[];              // medidas prontas: {tipo:'dist'|'area', pontos:[...], fechado:bool, nome:''}
+let labels=[],alfinete=null;
+let medir=false;          // compatibilidade
+
+function pontoNaCena(x,y){
+  const q=ponto3D(x,y);
+  if(!q)return null;
+  return {i:q.i,j:q.j,p:q.p,cena:CENA?CENA.nome:null,abs:q.abs};
+}
+function abreBarraMed(txt){
+  const b=document.getElementById('barraMed');
+  document.getElementById('bmTxt').textContent=txt;
+  b.classList.add('aberta');
+  document.getElementById('bmFecha').style.display=(pts.length>=3)?'':'none';
+}
+function fechaBarraMed(){document.getElementById('barraMed').classList.remove('aberta')}
+function cancelaMed(){pts=[];modo=null;fechaBarraMed();desenha()}
+function concluiMed(){
+  if(pts.length<2){aviso('Escolha pelo menos 2 pontos');return}
+  meds.push({tipo:'dist',pontos:pts.slice(),fechado:false,nome:'Medição '+(meds.filter(m=>m.tipo==='dist').length+1)});
+  pts=[];modo=null;fechaBarraMed();desenha();
+}
+function iniciaModo(t){
+  modo=t;pts=[];medir=(t==='dist');
+  document.getElementById('mMedir').classList.toggle('ativo',t==='dist');
+  document.getElementById('mArea').classList.toggle('ativo',t==='area');
+  document.getElementById('mExcluir').classList.toggle('ativo',t==='excluir');
+  if(t==='dist')abreBarraMed('Medindo distância: clique nos pontos (2 ou mais)');
+  if(t==='area')abreBarraMed('Medindo área: clique em 3 ou mais pontos');
+  if(t==='excluir')abreBarraMed('Excluir: clique no objeto que deseja apagar');
+  desenha();
+}
+function medeArea(P){ // formula de Gauss em planta (X=leste, Y=norte)
+  let a=0;
+  for(let k=0;k<P.length;k++){const q=P[k],r=P[(k+1)%P.length];a+=q[0]*r[1]-r[0]*q[1]}
+  return Math.abs(a)/2;
+}
+function segmentosCruzam(P){ // area invalida se dois segmentos nao vizinhos se cruzam
+  const n=P.length;
+  const inter=(a,b,c,d)=>{
+    const d1=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+    const d2=(b[0]-a[0])*(d[1]-a[1])-(b[1]-a[1])*(d[0]-a[0]);
+    const d3=(d[0]-c[0])*(a[1]-c[1])-(d[1]-c[1])*(a[0]-c[0]);
+    const d4=(d[0]-c[0])*(b[1]-c[1])-(d[1]-c[1])*(b[0]-c[0]);
+    return ((d1>0)!==(d2>0))&&((d3>0)!==(d4>0));
+  };
+  for(let i=0;i<n;i++)for(let j=i+2;j<n;j++){
+    if(i===0&&j===n-1)continue;
+    if(inter(P[i],P[(i+1)%n],P[j],P[(j+1)%n]))return true;
+  }
+  return false;
+}
+
 
 function desenhaNadir(){
   // calota sob o scanner (polo inferior). Desenhada ponto a ponto no contorno de um
@@ -786,29 +1076,102 @@ function desenhaNadir(){
 }
 function desenhaMedicoes(){
   document.querySelectorAll('.rot.med').forEach(e=>e.remove());
-  if(!document.getElementById('bOlho').classList.contains('on')&&false)return;
-  ctx.lineWidth=2;
-  for(const m of meds){
-    const A=m.a,B=m.b; const pa=(m.ca&&telaDeCelula(m.ca[0],m.ca[1]))||projeta(A),pb=(m.cb&&telaDeCelula(m.cb[0],m.cb[1]))||projeta(B); if(!pa||!pb)continue;
-    // catetos: horizontal e vertical
-    const pc=[pb[0],pa[1]];
-    ctx.strokeStyle='#26a0e0';ctx.beginPath();ctx.moveTo(...pa);if(pc)ctx.lineTo(...pc);ctx.lineTo(...pb);ctx.stroke();
-    ctx.strokeStyle='#000';ctx.beginPath();ctx.moveTo(...pa);ctx.lineTo(...pb);ctx.stroke();
-    ctx.fillStyle='#f5a623';for(const q of [pa,pb]){ctx.beginPath();ctx.arc(q[0],q[1],4,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.stroke();ctx.lineWidth=2}
-    const dx=B[0]-A[0],dy=B[1]-A[1],dz=B[2]-A[2];
-    const hor=Math.hypot(dx,dy),ver=Math.abs(dz),tot=Math.hypot(dx,dy,dz);
-    const mx=(pa[0]+pb[0])/2,my=(pa[1]+pb[1])/2;
-    nota(mx,my-34,m.aberto?`<b>Horizontal</b> = ${f3(hor)} m<br>Ao longo do eixo x = ${f3(Math.abs(dx))} m<br>Ao longo do eixo y = ${f3(Math.abs(dy))} m<br><b>Vertical</b> = ${f3(ver)} m<br><b>Início ao Fim</b> = ${f3(tot)} m<br><br><b>Coordenadas UTM 22S</b><br>Início: ${f2(absoluto(A)[0])}, ${f2(absoluto(A)[1])}, ${f2(absoluto(A)[2])}<br>Fim: ${f2(absoluto(B)[0])}, ${f2(absoluto(B)[1])}, ${f2(absoluto(B)[2])}`:`Início ao Fim = ${f3(tot)} m`,m);
+  // pontos da medicao em andamento
+  const desenhaPts=(P,fechado,cor)=>{
+    for(let k=0;k<P.length;k++){
+      const q=P[k].tela||(P[k].tela=telaDeCelula(P[k].i,P[k].j));
+      if(!q)continue;
+      ctx.fillStyle=cor;ctx.beginPath();ctx.arc(q[0],q[1],5,0,7);ctx.fill();
+      ctx.lineWidth=1.5;ctx.strokeStyle='#000';ctx.stroke();
+    }
+  };
+  if(CFG.med){
+    ctx.lineWidth=2;
+    meds.forEach(m=>{
+      const telas=m.pontos.map(p=>telaDeCelula(p.i,p.j));
+      if(m.tipo==='dist'){
+        // polilinha + rotulo por segmento + total na ponta
+        let soma=0;
+        for(let k=0;k<m.pontos.length;k++){
+          const A=m.pontos[k], qa=telas[k];
+          if(!qa)continue;
+          const prox=(m.fechado&&k===m.pontos.length-1)?0:k+1;
+          if(prox>=m.pontos.length)continue;
+          const B=m.pontos[prox], qb=telas[prox];
+          if(!qb)continue;
+          const d=Math.hypot(B.p[0]-A.p[0],B.p[1]-A.p[1],B.p[2]-A.p[2]); soma+=d;
+          const dx=B.p[0]-A.p[0],dy=B.p[1]-A.p[1],dz=B.p[2]-A.p[2];
+          // catetos na primeira ligacao (eixos e angulos, como no manual)
+          if(k===0){
+            const pc=[qb[0],qa[1]];
+            ctx.strokeStyle='#26a0e0';ctx.beginPath();ctx.moveTo(...qa);ctx.lineTo(...pc);ctx.lineTo(...qb);ctx.stroke();
+          }
+          ctx.strokeStyle='#111';ctx.beginPath();ctx.moveTo(...qa);ctx.lineTo(...qb);ctx.stroke();
+          nota((qa[0]+qb[0])/2,(qa[1]+qb[1])/2,
+            `<b>${uComp(d)}</b>${k===0?`<br>H ${uComp(Math.hypot(dx,dy))}<br>V ${uComp(Math.abs(dz))}`:''}`,{tipo:'med',aberto:false,dados:()=>
+            `<b>Segmento ${k+1}</b><br>Comprimento = ${uComp(d)}<br>Início → Fim = ${uComp(d)}<br>Horizontal = ${uComp(Math.hypot(dx,dy))}<br>Vertical = ${uComp(Math.abs(dz))}<br>Ao longo do eixo x = ${uComp(Math.abs(dx))}<br>Ao longo do eixo y = ${uComp(Math.abs(dy))}<br>Ângulo = ${uAng(Math.atan2(dy,dx))}`});
+        }
+        const qf=telas[telas.length-1];
+        if(qf)nota(qf[0],qf[1]-40,`${m.nome||'Medição'}<br><b>Σ ${uComp(soma)}</b>`,
+          {tipo:'med',aberto:false,dados:()=>`<b>${m.nome||'Medição'}</b><br>Total = ${uComp(soma)}<br>Pontos = ${m.pontos.length}${m.fechado?'<br>(perímetro fechado)':''}`});
+        desenhaPts(m.pontos,'#f5a623');
+      }else{
+        const P=m.pontos.map(p=>p.p);
+        const inval=segmentosCruzam(P);
+        ctx.strokeStyle=inval?'#e5484d':'#f5a623';
+        ctx.beginPath();
+        telas.forEach((q,k)=>{if(!q)return;k?ctx.lineTo(...q):ctx.moveTo(...q)});
+        if(telas[telas.length-1])ctx.closePath();
+        ctx.stroke();
+        ctx.fillStyle=inval?'rgba(229,72,77,.18)':'rgba(245,166,35,.18)';ctx.fill();
+        desenhaPts(m.pontos,'#f5a623');
+        const qc=telas[0];
+        if(qc)nota(qc[0],qc[1]-40,`${inval?'Área inválida':uArea(medeArea(P))}`,
+          {tipo:'med',aberto:false,dados:()=>`<b>${inval?'Área inválida':'Área de medição'}</b><br>${inval?'Os segmentos se cruzam: reposicione os pontos.':'Área = '+uArea(medeArea(P))+`<br>Perímetro = ${uComp(P.length>1?P.reduce((a,q,k)=>{const r=P[(k+1)%P.length];return a+Math.hypot(r[0]-q[0],r[1]-q[1],r[2]-q[2])},0):0)}`}`});
+      }
+    });
+    // em andamento
+    if(pts.length){
+      const telas=pts.map(p=>telaDeCelula(p.i,p.j));
+      ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();
+      telas.forEach((q,k)=>{if(!q)return;k?ctx.lineTo(...q):ctx.moveTo(...q)});
+      ctx.stroke();
+      desenhaPts(pts,'#f5a623');
+      let soma=0;
+      for(let k=1;k<pts.length;k++)soma+=Math.hypot(pts[k].p[0]-pts[k-1].p[0],pts[k].p[1]-pts[k-1].p[1],pts[k].p[2]-pts[k-1].p[2]);
+      const qf=telas[telas.length-1];
+      if(qf)nota(qf[0],qf[1]-40,`${modo==='area'?'Área':'Distância'}: ${pts.length} ponto(s)`+(pts.length>1?`<br><b>Σ ${modo==='area'?(pts.length>2?uArea(medeArea(pts.map(p=>p.p))):'—'):uComp(soma)}</b>`:''),{tipo:'med',aberto:false,dados:()=>'<b>Em andamento</b><br>Clique nos pontos e depois em Concluir.'});
+    }
   }
-  if(alfinete){const q=telaDeCelula(alfinete[0],alfinete[1]);if(q){ctx.fillStyle='#e8412c';ctx.beginPath();ctx.arc(q[0],q[1],6,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke()}}
-  if(pts[0]){const q=telaDeCelula(pts[0].i,pts[0].j);if(q){ctx.fillStyle='#f5a623';ctx.beginPath();ctx.arc(q[0],q[1],5,0,7);ctx.fill()}}
+  if(alfinete&&CFG.med!==undefined){
+    const q=telaDeCelula(alfinete[0],alfinete[1]);
+    if(q){ctx.fillStyle='#e8412c';ctx.beginPath();ctx.arc(q[0],q[1],6,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+      nota(q[0],q[1]-30,'<b>Alfinete</b><br>clique para copiar',{tipo:'med',aberto:false,dados:()=>{
+        const a=absoluto(PGX[alfinete[0]*GW+alfinete[1]]!==undefined?[PGX[alfinete[0]*GW+alfinete[1]],PGY[alfinete[0]*GW+alfinete[1]],PGZ[alfinete[0]*GW+alfinete[1]]]:[0,0,0]);
+        return `<b>Coordenada (UTM 22S)</b><br>E = ${f3(a[0])}<br>N = ${f3(a[1])}<br>Z = ${f3(a[2])}`;
+      }});
+      ctx.restore&&ctx.restore();
+    }
+  }
+  if(pts[0]&&!CFG.med){/* nada */}
 }
 function nota(x,y,html,m){
   const d=document.createElement('div');d.className='rot med det';d.innerHTML=html;
-  const r=cv.getBoundingClientRect();d.style.left=(r.left+x-60)+'px';d.style.top=(r.top+y)+'px';d.style.pointerEvents='auto';d.style.cursor='pointer';
-  d.onclick=e=>{e.stopPropagation();m.aberto=!m.aberto;desenha()};
+  const r=cv.getBoundingClientRect();
+  d.style.left=Math.max(4,Math.min(innerWidth-160,r.left+x-60))+'px';
+  d.style.top=Math.max(36,r.top+y)+'px';
+  d.style.pointerEvents='auto';d.style.cursor='pointer';
+  d.onclick=e=>{
+    e.stopPropagation();
+    if(m&&m.dados&&m.dados()!==undefined&&m.tipo==='med'){
+      d.innerHTML=m.aberto?html:m.dados();
+      m.aberto=!m.aberto;
+    }
+  };
+  if(!CFG.nota&&m&&m.tipo==='nota')return;
   document.body.appendChild(d);
 }
+
 function desenhaBussola(){
   const c=document.getElementById('bussola'),g=c.getContext('2d');g.clearRect(0,0,240,48);
   g.fillStyle='rgba(246,247,248,.95)';g.beginPath();g.ellipse(120,52,118,48,0,Math.PI,2*Math.PI);g.fill();
@@ -848,18 +1211,34 @@ cv.addEventListener('pointerup',e=>{
   pontas.delete(e.pointerId);
   if(pontas.size<2)dPinch=0;
   arr=false;if(moveu>3)return;
-  const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,q=ponto3D(x,y);
-  if(!q){aviso('Sem retorno do laser neste ponto');return}
-  if(medir){
-    pts.push(q);
-    if(pts.length===2){meds.push({a:pts[0].p,b:pts[1].p,ca:[pts[0].i,pts[0].j],cb:[pts[1].i,pts[1].j],aberto:false});pts=[];medir=false;document.getElementById('mMedir').classList.remove('ativo')}
-    desenha();
-  }else{
-    const a=absoluto(q.p);
-    document.getElementById('bXYZ').innerHTML=`E <b>${f2(a[0])}</b> · N <b>${f2(a[1])}</b> · Z <b>${f2(a[2])}</b>`;
-    document.getElementById('bPin').innerHTML=`Alfinete (UTM 22S): <b>${f2(a[0])} , ${f2(a[1])} , ${f2(a[2])}</b>`;
-    alfinete=[q.i,q.j];desenha();
+  const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,q=pontoNaCena(x,y);
+  if(modo==='excluir'){
+    // exclui a medicao mais proxima do ponto clicado (so o que foi criado aqui)
+    if(!q){aviso('Clique sobre um objeto');return}
+    let melhor=-1,dist=1e9;
+    meds.forEach((m,idx)=>{
+      m.pontos.forEach(p2=>{
+        const t=telaDeCelula(p2.i,p2.j); if(!t)return;
+        const d=Math.hypot(t[0]-x,t[1]-y);
+        if(d<dist){dist=d;melhor=idx}
+      });
+    });
+    if(melhor>=0&&dist<90){meds.splice(melhor,1);aviso('Objeto excluído');desenha()}
+    else aviso('Nenhum objeto nesse ponto');
+    return;
   }
+  if(modo==='dist'||modo==='area'){
+    if(!q){aviso('Ponto inválido: sem retorno do laser aqui (ponto vermelho no manual)');return}
+    pts.push(q);
+    abreBarraMed((modo==='area'?'Área':'Distância')+': '+pts.length+' ponto(s) · clique em Concluir');
+    desenha();
+    return;
+  }
+  if(!q){aviso('Sem retorno do laser neste ponto');return}
+  const a2=absoluto(q.p);
+  document.getElementById('bXYZ').innerHTML=`E <b>${f2(a2[0])}</b> · N <b>${f2(a2[1])}</b> · Z <b>${f2(a2[2])}</b>`;
+  document.getElementById('bPin').innerHTML=`Alfinete (UTM 22S): <b>${f2(a2[0])} , ${f2(a2[1])} , ${f2(a2[2])}</b>`;
+  alfinete=[q.i,q.j];desenha();
 });
 cv.addEventListener('pointercancel',e=>{pontas.delete(e.pointerId);dPinch=0;arr=false});
 cv.addEventListener('wheel',e=>{e.preventDefault();fov*=e.deltaY>0?1.1:0.9;fov=Math.max(FOVMIN,Math.min(FOVMAX,fov));desenha()},{passive:false});
@@ -867,10 +1246,14 @@ document.getElementById('zIn').onclick=()=>{fov=Math.max(FOVMIN,fov*0.82);desenh
 document.getElementById('zOut').onclick=()=>{fov=Math.min(FOVMAX,fov*1.22);desenha()};
 
 function aviso(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2200)}
-document.getElementById('mMedir').onclick=()=>{medir=true;pts=[];document.getElementById('mMedir').classList.add('ativo');aviso('Clique no ponto inicial e depois no final')};
-document.getElementById('mExcluir').onclick=()=>{meds=[];pts=[];desenha()};
+document.getElementById('mMedir').onclick=()=>iniciaModo('dist');
+document.getElementById('mExcluir').onclick=()=>{
+  // exclusao guiada: apaga o objeto da medicao que o Danilo clicar
+  iniciaModo('excluir');
+  aviso('Clique sobre a medição que deseja excluir');
+};
 document.getElementById('bBussola').onclick=e=>{e.currentTarget.classList.toggle('on');document.getElementById('bussola').style.display=e.currentTarget.classList.contains('on')?'block':'none'};
-document.getElementById('bOlho').onclick=e=>{e.currentTarget.classList.toggle('on');};
+try{aplicaCfg()}catch(e){console.warn(e)}
 
 document.getElementById('fecharLat').onclick=()=>{
   document.body.classList.add('latOculta');
