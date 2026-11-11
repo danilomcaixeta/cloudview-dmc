@@ -186,6 +186,10 @@ body.latOculta #telaVisao{right:0}
   </div>
 </div>
 <script>
+// ---- base dos arquivos pesados: Cloudflare R2 (o GitHub guarda so o software) ----
+const R2BASE='https://pub-4124c0d235a343278f1e6c5bbdb2c539.r2.dev/dcm/gyn-shop/';
+function arq(p){ if(!R2BASE) return p; return R2BASE + p.split('/').map(encodeURIComponent).join('/'); }
+
 window.addEventListener('error',e=>{const d=document.getElementById('dica');if(d)d.textContent='ERRO: '+e.message+' @'+(e.lineno||'')});
 window.addEventListener('unhandledrejection',e=>{const d=document.getElementById('dica');if(d)d.textContent='ERRO: '+(e.reason&&e.reason.message||e.reason)});
 (async()=>{
@@ -227,10 +231,10 @@ function aplica(){
 // ---------- grade 3D do setup aberto ----------
 let GW=0,GH=0,PGX=null,PGY=null,PGZ=null,PORIG=null;
 async function carregaGrade(nome){
-  const r0=await fetch('dados/'+encodeURIComponent(nome)+'.json');
+  const r0=await fetch(arq('dados/'+nome+'.json'));
   if(!r0.ok) throw new Error('sem grade');
   const meta=await r0.json();
-  const r1=await fetch('dados/'+encodeURIComponent(nome)+'.bin.gz');
+  const r1=await fetch(arq('dados/'+nome+'.bin.gz'));
   if(!r1.ok) throw new Error('sem grade');
   const buf=await r1.arrayBuffer();
   const out=await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
@@ -252,7 +256,7 @@ async function carregaGrade(nome){
 // troca o panorama exibido (chamado pela vista superior)
 async function carregaPano(nome){
   try{
-    const im=new Image(); im.src='panos/'+nome+'.jpg';
+    const im=new Image(); im.src=arq('panos/'+nome+'.jpg');
     await im.decode();
     W=im.naturalWidth; H=im.naturalHeight; N=W*H;
     aux.width=W; aux.height=H;
@@ -277,7 +281,7 @@ if(!window._cenaURL) setTimeout(()=>{try{abreMapa()}catch(e){}},60);
   const ok=(g.setups||[]).filter(x=>x.dados);
   if(!ok.length)return;
   const alvo=window._cenaURL||localStorage.getItem('dmc_pano')||ok[0].nome;
-  const tem=await fetch('dados/'+encodeURIComponent(alvo)+'.json');
+  const tem=await fetch(arq('dados/'+alvo+'.json'));
   if(tem.ok||window._cenaURL) await carregaPano(alvo);
 }catch(e){}})();
 
@@ -523,8 +527,8 @@ function desenhaCards(){
   if(!ok){box.innerHTML='<div style="color:#777;font:13px Inter,sans-serif;padding:10px">Nenhum projeto encontrado</div>';return}
   const c=document.createElement('div');c.className='pCard';
   const tot=(GYN&&GYN.total_projeto)||proj.setups.length;
-  const feitas=(GYN&&GYN.setups.length)||proj.setups.length;
-  c.innerHTML=`<img src="${proj.setups[0].thumb}" alt=""><div class="pInfo"><b>${proj.projeto}</b><span>${proj.cliente||''}</span><span>${feitas} de ${tot} varreduras processadas</span><span class="tag">UTM 22S</span><button class="btnAbrir">Abrir projeto</button></div>`;
+  const feitas=(GYN&&(GYN.processadas||GYN.setups.length))||proj.setups.length;
+  c.innerHTML=`<img src="${arq(proj.setups[0].thumb)}" alt=""><div class="pInfo"><b>${proj.projeto}</b><span>${proj.cliente||''}</span><span>${feitas} de ${tot} varreduras processadas</span><span class="tag">UTM 22S</span><button class="btnAbrir">Abrir projeto</button></div>`;
   c.onclick=abreOProjeto;
   box.appendChild(c);
 }
