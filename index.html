@@ -495,7 +495,7 @@ body.emVarreduras #nomeScan{display:inline}
 const NADIR=parseFloat(new URLSearchParams(location.search).get('nadir'))||0.13;
 // ---- base dos arquivos pesados: Cloudflare R2 (o GitHub guarda so o software) ----
 const R2BASE='https://pub-4124c0d235a343278f1e6c5bbdb2c539.r2.dev/dcm/gyn-shop/';
-const R2V='3';  // sobe quando precisar furar cache antigo dos arquivos
+const R2V='4';  // sobe quando precisar furar cache antigo dos arquivos
 function arq(p){ if(!R2BASE) return p; return R2BASE + p.split('/').map(encodeURIComponent).join('/')+'?v='+R2V; }
 
 window.addEventListener('error',e=>{const d=document.getElementById('dica');if(d)d.textContent='ERRO: '+e.message+' @'+(e.lineno||'')});
@@ -1068,29 +1068,36 @@ function constroi3D(nome,imgPano){
   b('x3d').onclick=()=>{fecha3D();document.getElementById('mVarr').click()};
 }
 
+let _pedidoPano=0;     // numero do ultimo pedido: so a ultima cena clicada pode atualizar a tela
 async function carregaPano(nome){
+  const meu=++_pedidoPano;
+  const velho=()=>meu!==_pedidoPano;           // outro clique chegou depois: abandona este
   try{
+    // marca ja a cena escolhida (cabecalho, barra e indice), antes de qualquer espera
+    const bn=document.getElementById('bNome'); if(bn)bn.textContent=nome;
+    const ns=document.getElementById('nomeScan'); if(ns)ns.textContent='· '+nome;
+    if(!GYN){try{GYN=await (await fetch('setups_v2.json?t='+Date.now())).json()}catch(e){}}
+    if(velho())return;
+    CENA=(GYN&&GYN.setups.find(x=>x.nome===nome))||null;
+    VIZ=[]; if(caixaPinos)caixaPinos.innerHTML='';          // limpa pinos da cena anterior
+    PGX=null; GW=0;                                         // invalida a grade da cena anterior
     const im=new Image(); im.crossOrigin='anonymous'; im.src=arq('panos/'+nome+'.jpg');
     await im.decode();
+    if(velho())return;
     W=im.naturalWidth; H=im.naturalHeight; N=W*H;
     aux.width=W; aux.height=H;
     ax.clearRect(0,0,W,H); ax.drawImage(im,0,0);
     tampaNadir(W,H);
     orig=ax.getImageData(0,0,W,H);
     out=ax.createImageData(W,H);
-    gv=new Uint8Array(N).fill(1);          // percentis consideram toda a imagem
+    gv=new Uint8Array(N).fill(1);
     aplica(); desenha();
-    const bn=document.getElementById('bNome'); if(bn)bn.textContent=nome;
-    const ns=document.getElementById('nomeScan'); if(ns)ns.textContent='· '+nome;
     try{await carregaGrade(nome)}catch(e){GW=0;PGX=null}
+    if(velho())return;
     localStorage.setItem('dmc_pano',nome);
-    try{
-      if(!GYN)GYN=await (await fetch('setups_v2.json?t='+Date.now())).json();
-      CENA=GYN.setups.find(x=>x.nome===nome)||null;
-      roda.classList.remove('aberta');
-      calculaVizinhos();
-    }catch(e){console.warn('vizinhos',e)}
-  }catch(e){aviso('Panorama não encontrado: '+nome)}
+    roda.classList.remove('aberta');
+    calculaVizinhos();
+  }catch(e){ if(!velho())aviso('Panorama não encontrado: '+nome) }
 }
 window.abrePano=function(n){document.body.classList.add('emVarreduras');return carregaPano(n)};
 window._cenaURL=new URLSearchParams(location.search).get('cena');
