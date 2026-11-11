@@ -467,7 +467,7 @@ body.emVarreduras #nomeScan{display:inline}
 const NADIR=parseFloat(new URLSearchParams(location.search).get('nadir'))||0.13;
 // ---- base dos arquivos pesados: Cloudflare R2 (o GitHub guarda so o software) ----
 const R2BASE='https://pub-4124c0d235a343278f1e6c5bbdb2c539.r2.dev/dcm/gyn-shop/';
-const R2V='2';  // sobe quando precisar furar cache antigo dos arquivos
+const R2V='3';  // sobe quando precisar furar cache antigo dos arquivos
 function arq(p){ if(!R2BASE) return p; return R2BASE + p.split('/').map(encodeURIComponent).join('/')+'?v='+R2V; }
 
 window.addEventListener('error',e=>{const d=document.getElementById('dica');if(d)d.textContent='ERRO: '+e.message+' @'+(e.lineno||'')});
@@ -1640,7 +1640,7 @@ function atualizaBarraElev(){
 let vgOrto=null, vgQualPiso=null;
 async function carregaOrto(forca){
   if(!vg)return;
-  if(!window._MOS){try{window._MOS=await (await fetch(arq('mosaico/mosaicos.json?t='+Date.now()))).json()}catch(e){return}}
+  if(!window._MOS){try{window._MOS=await (await fetch(arq('mosaico/mosaicos.json'))).json()}catch(e){return}}
   const alvo=(pisoAtivo==='Todos')?null:(window._MOS[pisoAtivo]?pisoAtivo:null);   // a vista superior e sempre a do piso escolhido
   if(vgOrto&&vgQualPiso===alvo&&!forca)return;
   if(vgOrto){vg.removeLayer(vgOrto);vgOrto=null}
