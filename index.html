@@ -111,6 +111,9 @@ body.latOculta #telaConteudo{right:0}
 .mnuEx div{padding:10px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;font:13px "Segoe UI",sans-serif;color:#222}
 .mnuEx div:hover{background:#eef4f7}
 .mnuEx b{font-size:15px;width:22px}
+.pinoRoxo.sel .pinoEtiq{background:#f5a623!important;color:#111!important;border-color:#c97f00!important;font-weight:700}
+.pinoRoxo.sel .pinoGlobo{outline:3px solid #f5a623;border-radius:50%}
+.pinoRoxo.sel{z-index:9999!important}
 /* ---- card do projeto (estilo WebShare) ---- */
 #projCard{background:#fff;border:1px solid #dfe2e5;border-radius:3px;box-shadow:0 1px 4px #0002;margin-bottom:16px}
 #pcTopo{display:flex;justify-content:space-between;align-items:center;background:#ececec;padding:14px 20px;border-bottom:1px solid #dcdfe2}
@@ -238,9 +241,17 @@ body.latOculta #telaVisao{right:0}
 #pisoBar button.on{background:#1f7a3a;border-color:#1f7a3a;color:#fff}
 #pisoBar span.ct{opacity:.65;font-weight:400}
 
-#visaoDetalhe{display:none;position:absolute;left:12px;right:12px;bottom:44px;background:#fff;border-radius:8px;box-shadow:0 4px 16px #0003;padding:12px 14px;font:13px Inter,system-ui,sans-serif;z-index:1001}
-#visaoDetalhe b{display:block;font-size:14px;margin-bottom:2px}
-#visaoDetalhe button{margin-top:8px;background:#1f7a3a;color:#fff;border:0;border-radius:7px;padding:9px 14px;font:600 13px Inter,sans-serif;cursor:pointer}
+#visaoDetalhe{display:none;position:absolute;left:12px;right:12px;bottom:44px;background:#fff;color:#222;border-radius:8px;box-shadow:0 4px 18px #0004;padding:12px 14px;font:13px "Segoe UI",system-ui,sans-serif;z-index:1001;gap:14px;align-items:center}
+#visaoDetalhe.aberto{display:flex}
+#visaoDetalhe img{width:132px;height:66px;object-fit:cover;border-radius:5px;background:#222;flex:none}
+#visaoDetalhe .vdInfo{flex:1;min-width:0}
+#visaoDetalhe .vdNome{display:block;font-size:15px;font-weight:700;color:#111;margin-bottom:3px}
+#visaoDetalhe .vdSub{color:#555;font-size:12.5px;line-height:1.45}
+#visaoDetalhe .vdAcoes{display:flex;gap:8px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+#visaoDetalhe .vdAcoes button{margin:0;background:#fff;color:#111;border:2px solid #2a9fd0;border-radius:50%;width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;font:800 15px "Segoe UI",sans-serif;cursor:pointer}
+#visaoDetalhe .vdAcoes button:hover{background:#e6f5fb}
+#visaoDetalhe .vdFecha{position:absolute;right:8px;top:4px;border:0;background:none;color:#666;font-size:18px;cursor:pointer;padding:2px 6px}
+@media (max-width:760px){#visaoDetalhe{flex-wrap:wrap}#visaoDetalhe img{width:96px;height:48px}}
 
 #nomeScan{display:none}
 body.emVarreduras #nomeScan{display:inline}
@@ -1047,7 +1058,7 @@ function iconeBolha(n){
   return L.divIcon({className:'',html:'<div class="bolha" style="width:38px;height:38px">'+n+'</div>',iconSize:[38,38],iconAnchor:[19,19]});
 }
 function iconePinoVg(nome){
-  return L.divIcon({className:'pinoRoxo',html:'<div class="pinoWrap"><div class="pinoSombra"></div><div class="pinoGota"></div><div class="pinoGlobo"></div><div class="pinoEtiq">'+nome+'</div></div>',iconSize:[120,92],iconAnchor:[60,57]});
+  return L.divIcon({className:'pinoRoxo'+(nome===vgSel?' sel':''),html:'<div class="pinoWrap"><div class="pinoSombra"></div><div class="pinoGota"></div><div class="pinoGlobo"></div><div class="pinoEtiq">'+nome+'</div></div>',iconSize:[120,92],iconAnchor:[60,57]});
 }
 function listaVisivel(){
   if(!GYN)return [];
@@ -1067,8 +1078,37 @@ function montaPisos(){
   GYN.pisos.forEach(p=>mk(p,p,GYN.contagem[p]));
 }
 
+
+// painel do setup selecionado no mapa de visao geral (nome, piso, cota e as 4 opcoes)
+function mostraDetalheSetup(st){
+  vgSel=st.nome;
+  const d=document.getElementById('visaoDetalhe');
+  const ic={
+    pano:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><rect x="3" y="4" width="18" height="16"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg>',
+    info:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h10"/></svg>'
+  };
+  d.innerHTML=`<button class="vdFecha" title="Fechar">×</button>
+    <img src="${arq('thumbs/'+st.nome+'.jpg')}" alt="">
+    <div class="vdInfo"><span class="vdNome">${st.nome}</span>
+      <div class="vdSub">${st.piso||'—'} · Cota ${Number(st.Z).toFixed(2)} m<br>E ${Number(st.E).toFixed(3)} · N ${Number(st.N).toFixed(3)}</div></div>
+    <div class="vdAcoes">
+      <button data-o="pano" title="Abrir panorâmica">${ic.pano}</button>
+      <button data-o="nuvem" title="Vista 3D">3D</button>
+      <button data-o="info" title="Mostrar propriedades">${ic.info}</button>
+    </div>`;
+  d.classList.add('aberto'); d.style.display='';
+  d.querySelector('.vdFecha').onclick=()=>{d.classList.remove('aberto');vgSel=null;try{redesenhaVG()}catch(e){}};
+  d.querySelectorAll('.vdAcoes button').forEach(b=>b.onclick=()=>{
+    const o=b.dataset.o;
+    if(o==='pano'){document.getElementById('telaVisao').classList.remove('aberta');d.classList.remove('aberto');window.abrePano(st.nome)}
+    else if(o==='info'){infoSetup(st.nome)}
+    else{aviso('Nuvem 3D deste setup: em desenvolvimento')}
+  });
+  try{redesenhaVG()}catch(e){}      // redesenha para destacar o pino escolhido
+}
+
 // centra o mapa de visao geral em um setup e mostra o detalhe dele
-let vgAnel=null;
+let vgAnel=null, vgSel=null;
 function vgDestaca(nome){
   if(!vg||!GYN)return;
   const st=GYN.setups.find(x=>x.nome===nome); if(!st||!st.lat)return;
@@ -1078,13 +1118,7 @@ function vgDestaca(nome){
   if(vgAnel){vg.removeLayer(vgAnel)}
   vgAnel=L.circleMarker([st.lat,st.lon],{radius:22,color:'#2a9fd0',weight:4,fillColor:'#2a9fd0',fillOpacity:.15}).addTo(vg);
   setTimeout(()=>{ if(vgAnel){vg.removeLayer(vgAnel);vgAnel=null} },6000);
-  const d=document.getElementById('visaoDetalhe');
-  d.innerHTML='<b>'+st.nome+'</b><br>'+st.piso+'<br><button id="btnAbrirPano">Abrir panorama</button>';
-  d.style.display='block';
-  setTimeout(()=>{const b=document.getElementById('btnAbrirPano');if(b)b.onclick=()=>{
-    document.getElementById('telaVisao').classList.remove('aberta');
-    window.abrePano(st.nome);
-  }},0);
+  mostraDetalheSetup(st);
 }
 function enquadra(){if(vg)vg._fitar=true;redesenhaVG();setTimeout(()=>{if(vg)vg._fitar=false},1200)}
 function redesenhaVG(){
@@ -1105,15 +1139,7 @@ function redesenhaVG(){
     }else{
       const st=g.itens[0];
       const mk=L.marker([st.lat,st.lon],{icon:iconePinoVg(st.nome)}).addTo(vgGrupos);
-      mk.on('click',()=>{
-        const d=document.getElementById('visaoDetalhe');
-        d.innerHTML='<b>'+st.nome+'</b><br>'+st.piso+'<br><button id="btnAbrirPano">Abrir panorama</button>';
-        d.style.display='block';
-        setTimeout(()=>{document.getElementById('btnAbrirPano').onclick=()=>{
-          document.getElementById('telaVisao').classList.remove('aberta');
-          window.abrePano(st.nome);
-        }},0);
-      });
+      mk.on('click',()=>mostraDetalheSetup(GYN.setups.find(x=>x.nome===st.nome)||st));
     }
   });
   document.getElementById('vgN').textContent=pts.length;
@@ -1145,7 +1171,7 @@ document.getElementById('mMapa').onclick=abreVisao;
 document.getElementById('fechaVisao').onclick=()=>{
   document.getElementById('mMapa').classList.remove('ativo');
   document.getElementById('mVarr').classList.add('ativo');
-  document.getElementById('visaoDetalhe').style.display='none';
+  document.getElementById('visaoDetalhe').classList.remove('aberto');
   document.getElementById('telaVisao').classList.remove('aberta');
   abreMapa();   // volta para a pagina de projetos
 };
