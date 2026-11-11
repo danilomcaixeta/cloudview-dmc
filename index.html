@@ -753,8 +753,8 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('#mnuEx')&&!e.t
 //  CONFIGURACOES GERAIS (persistidas no navegador) e barra de acao
 // =====================================================================
 const CFG=Object.assign({uni:'m',area:'m2',ang:'grau',res:1,vel:1,dist:0,pinos:true,med:true,nota:true,bus:true,nome:true,elev:true,orto:true,cor:'intensidade',corN:50},
-  JSON.parse(localStorage.getItem('dmc_cfg')||'{}'));
-function salvaCfg(){localStorage.setItem('dmc_cfg',JSON.stringify(CFG))}
+  JSON.parse(localStorage.getItem('dmc_cfg_v3')||'{}'));
+function salvaCfg(){localStorage.setItem('dmc_cfg_v3',JSON.stringify(CFG))}
 function aplicaCfg(){
   // visibilidade
   document.getElementById('ckPinos').checked=CFG.pinos;
@@ -1641,7 +1641,7 @@ let vgOrto=null, vgQualPiso=null;
 async function carregaOrto(forca){
   if(!vg)return;
   if(!window._MOS){try{window._MOS=await (await fetch(arq('mosaico/mosaicos.json?t='+Date.now()))).json()}catch(e){return}}
-  const alvo=(pisoAtivo==='Todos')?('Geral GYN' in window._MOS?'Geral GYN':null):(window._MOS[pisoAtivo]?pisoAtivo:null);
+  const alvo=(pisoAtivo==='Todos')?null:(window._MOS[pisoAtivo]?pisoAtivo:null);   // a vista superior e sempre a do piso escolhido
   if(vgOrto&&vgQualPiso===alvo&&!forca)return;
   if(vgOrto){vg.removeLayer(vgOrto);vgOrto=null}
   vgQualPiso=alvo;
