@@ -1620,7 +1620,7 @@ iconePinoVg=function(nome,cor){
   const st=(GYN?GYN.setups.find(x=>x.nome===nome):null);
   const ic=_iconePinoVg(nome);
   if(cor&&st){
-    ic.options.html=ic.options.html.replace(/<div class="pinoGlobo"><\/div>/,`<div class="pinoGlobo" style="background:${cor};border-color:#fff"></div>`);
+    ic.options.html=ic.options.html.replace('<div class="pinoGota"></div>',`<div class="pinoGota" style="border:3px solid ${cor}"></div>`);
     ic.options.html=ic.options.html.replace(/style="[^"]*background:#6a1b9a[^"]*"/,'');
   }
   return ic;
@@ -1640,30 +1640,34 @@ function atualizaBarraElev(){
 // camada do mosaico (vista superior real gerada de cada setup)
 let vgOrto=null, vgQualPiso=null;
 function st(t){if(!/ERRO|FALHOU/.test(t))return;const e=document.getElementById('ortoSt');if(e){e.style.display='block';e.textContent=t}}
+// ordem de empilhamento em "Todos": do mais baixo para o mais alto, garagens embaixo e fachada por cima
+const ORDEM_ORTO=['Garagem 2','Garagem 1','Piso 1','Piso 2','Piso 3','Escada Seren','Escada Cinema','Drywall','Geral GYN','Outros','Fachada'];
 async function carregaOrto(forca){
   if(!vg)return;
-  if(!window._MOS){try{window._MOS=await (await fetch(arq('mosaico/mosaicos.json'))).json();st('MOS ok: '+Object.keys(window._MOS).length+' pisos')}catch(e){st('MOS FALHOU: '+e.message);return}}
-  const alvo=(pisoAtivo==='Todos')?null:(window._MOS[pisoAtivo]?pisoAtivo:null);   // a vista superior e sempre a do piso escolhido
-  if(vgOrto&&vgQualPiso===alvo&&!forca)return;
+  if(!window._MOS){try{window._MOS=await (await fetch(arq('mosaico/mosaicos.json'))).json()}catch(e){st('MOS FALHOU: '+e.message);return}}
+  const chave=pisoAtivo;
+  if(vgOrto&&vgQualPiso===chave&&!forca)return;
   if(vgOrto){vg.removeLayer(vgOrto);vgOrto=null}
-  vgQualPiso=alvo;
-  if(!alvo){st('sem mosaico para piso='+pisoAtivo);return}
-  if(!CFG.orto){st('orto desligado em CFG');return}
-  const m=window._MOS[alvo];
-  if(!m)return;
-  // dois cantos opostos: noroeste (E0,N1) e sudeste (E1,N0)
-  const no=utmParaLatLon(m.E0,m.N1), se=utmParaLatLon(m.E1,m.N0);
-  vgOrto=L.imageOverlay(arq('mosaico/'+m.arq),[[no[0],no[1]],[se[0],se[1]]],
-    {opacity:0.95,interactive:false}).addTo(vg);
-  vgOrto.on('load',()=>st('orto OK '+alvo+' bounds '+no[0].toFixed(5)+','+se[1].toFixed(5)));
-  vgOrto.on('error',()=>st('orto ERRO '+m.arq));
-  return [[no[0],no[1]],[se[0],se[1]]];
+  vgQualPiso=chave;
+  if(!CFG.orto)return;
+  const lista=(chave==='Todos')?ORDEM_ORTO.filter(k=>window._MOS[k]):(window._MOS[chave]?[chave]:[]);
+  if(!lista.length)return;
+  vgOrto=L.layerGroup().addTo(vg);
+  let sw=[1e9,1e9],ne=[-1e9,-1e9];
+  lista.forEach((k,idx)=>{
+    const m=window._MOS[k];
+    const no=utmParaLatLon(m.E0,m.N1), se=utmParaLatLon(m.E1,m.N0);
+    sw=[Math.min(sw[0],se[0]),Math.min(sw[1],no[1])]; ne=[Math.max(ne[0],no[0]),Math.max(ne[1],se[1])];
+    const im=L.imageOverlay(arq('mosaico/'+m.arq),[[no[0],no[1]],[se[0],se[1]]],
+      {opacity:(chave==='Todos'?0.6:0.95),interactive:false,zIndex:400+idx}).addTo(vgOrto);
+    im.on('error',()=>st('orto ERRO '+m.arq));
+  });
+  return [sw,ne];
 }
 // enquadra a vista superior do piso escolhido
-function enquadraOrto(){
-  const bd=carregaOrto(true);
-  if(bd&&bd.then)bd.then(b=>{if(b)vg.fitBounds(L.latLngBounds(b).pad(0.08),{animate:true})});
-  else if(bd&&bd.length)vg.fitBounds(L.latLngBounds(bd).pad(0.08),{animate:true});
+async function enquadraOrto(){
+  const b=await carregaOrto(true);
+  if(b)vg.fitBounds(L.latLngBounds(b).pad(0.08),{animate:true});
 }
 // converte UTM (E,N) para lat/lon por regressao afim calibrada com os proprios setups
 let _afim=null;
@@ -1742,8 +1746,8 @@ async function abreVisao(){
     const p0=GYN.setups.find(s=>s.lat)||{lat:-16.7078,lon:-49.2733};
     vg=L.map('mapaVisao',{zoomControl:true,attributionControl:false,zoomSnap:0.5,maxZoom:24}).setView([p0.lat,p0.lon],18);
     // fundo de mapa (a pessoa ve onde fica a cena) e um painel proprio para a vista superior
-    vgBase=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'}).addTo(vg);
-    vgSat=L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:'0123'});
+    vgBase=L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom:24,maxNativeZoom:20,subdomains:'0123'}).addTo(vg);
+    vgSat=L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{maxZoom:24,maxNativeZoom:20,subdomains:'0123'});
 
     vg.on('zoomend moveend',redesenhaVG);
     vgPronto=true;
