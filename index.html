@@ -1639,7 +1639,7 @@ function atualizaBarraElev(){
 }
 // camada do mosaico (vista superior real gerada de cada setup)
 let vgOrto=null, vgQualPiso=null;
-function st(t){const e=document.getElementById('ortoSt');if(e){e.style.display='block';e.textContent=t}}
+function st(t){if(!/ERRO|FALHOU/.test(t))return;const e=document.getElementById('ortoSt');if(e){e.style.display='block';e.textContent=t}}
 async function carregaOrto(forca){
   if(!vg)return;
   if(!window._MOS){try{window._MOS=await (await fetch(arq('mosaico/mosaicos.json'))).json();st('MOS ok: '+Object.keys(window._MOS).length+' pisos')}catch(e){st('MOS FALHOU: '+e.message);return}}
@@ -1736,6 +1736,7 @@ async function abreVisao(){
   document.getElementById('telaVisao').classList.add('aberta');
   if(!GYN){try{GYN=await (await fetch('setups.json')).json()}catch(e){}}
   if(!GYN)return;
+  if(CENA&&CENA.piso&&GYN.pisos&&GYN.pisos.includes(CENA.piso))pisoAtivo=CENA.piso;
   montaPisos();
   if(!vgPronto&&window.L){
     const p0=GYN.setups.find(s=>s.lat)||{lat:-16.7078,lon:-49.2733};
