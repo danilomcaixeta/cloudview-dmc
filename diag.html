@@ -9,18 +9,15 @@ const NOME='G2DOCA- G2DOCA035';
 async function t(rot,url,opts){
   const t0=performance.now();
   try{const r=await fetch(url,opts); const b=await r.blob();
-    log(rot+': OK '+r.status+' '+Math.round(b.size/1024)+'KB em '+Math.round(performance.now()-t0)+'ms');
-    return true;
-  }catch(e){log(rot+': FALHOU '+e.name+' ('+Math.round(performance.now()-t0)+'ms)');return false;}
+    log(rot+': OK '+r.status+' '+Math.round(b.size/1024)+'KB '+(r.headers.get('access-control-allow-origin')||'-'));
+  }catch(e){log(rot+': FALHOU '+e.name+' ('+Math.round(performance.now()-t0)+'ms)');}
 }
 (async()=>{
- await t('thumb 22KB', arq('thumbs/'+NOME+'.jpg'));
- await t('json grade', arq('dados/'+NOME+'.json'));
- await t('bin grade 1.4MB', arq('dados/'+NOME+'.bin.gz'));
- await t('pano 3.5MB', arq('panos/'+NOME+'.jpg'));
- await t('pano no-cors', arq('panos/'+NOME+'.jpg'), {mode:'no-cors'});
- const im=new Image(); im.crossOrigin='anonymous'; im.src=arq('panos/'+NOME+'.jpg');
- await new Promise(r=>{im.onload=r;im.onerror=r;setTimeout(r,15000)});
- log('Image tag: '+(im.naturalWidth?im.naturalWidth+'x'+im.naturalHeight+' ok':'ERRO'));
+ await t('pano (url igual)', arq('panos/'+NOME+'.jpg'));
+ await t('pano ?v=2', arq('panos/'+NOME+'.jpg')+'?v=2');
+ await t('pano cache reload', arq('panos/'+NOME+'.jpg')+'?v=3', {cache:'reload'});
+ await t('json ?v=2', arq('dados/'+NOME+'.json')+'?v=2');
+ await t('json sem espaco (teste)', R2BASE+'setups.json?x=1');
+ await t('thumb ?v=2', arq('thumbs/'+NOME+'.jpg')+'?v=2');
 })();
 </script>
